@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Notification Diagnostic</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+        .box { background: white; padding: 20px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #0ea5e9; }
+        .success { border-color: #10b981; background: #ecfdf5; }
+        .error { border-color: #ef4444; background: #fef2f2; }
+        button { background: #0ea5e9; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0284c7; }
+        pre { background: #1f2937; color: #10b981; padding: 15px; border-radius: 6px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔔 Notification System Diagnostic</h1>
+    
+    <div class="box">
+        <h3>Step 1: Check if notification panel exists</h3>
+        <button onclick="checkPanel()">Check Panel</button>
+        <div id="result1"></div>
+    </div>
+
+    <div class="box">
+        <h3>Step 2: Check if CSS is loaded</h3>
+        <button onclick="checkCSS()">Check CSS</button>
+        <div id="result2"></div>
+    </div>
+
+    <div class="box">
+        <h3>Step 3: Test API</h3>
+        <button onclick="testAPI()">Test API</button>
+        <div id="result3"></div>
+    </div>
+
+    <div class="box">
+        <h3>Step 4: Open Notification Panel</h3>
+        <button onclick="openPanel()">Open Panel</button>
+        <div id="result4"></div>
+    </div>
+
+    <script>
+        function checkPanel() {
+            const panel = document.getElementById('notifPanel');
+            const overlay = document.getElementById('notifOverlay');
+            const result = document.getElementById('result1');
+            
+            if (panel && overlay) {
+                result.innerHTML = '<div class="box success">✅ Panel exists! Found notifPanel and notifOverlay</div>';
+            } else {
+                result.innerHTML = '<div class="box error">❌ Panel NOT found! Missing: ' + 
+                    (!panel ? 'notifPanel ' : '') + (!overlay ? 'notifOverlay' : '') + '</div>';
+            }
+        }
+
+        function checkCSS() {
+            const result = document.getElementById('result2');
+            const links = document.querySelectorAll('link[rel="stylesheet"]');
+            let found = false;
+            
+            links.forEach(link => {
+                if (link.href.includes('notifications.css')) {
+                    found = true;
+                }
+            });
+            
+            if (found) {
+                result.innerHTML = '<div class="box success">✅ notifications.css is loaded!</div>';
+            } else {
+                result.innerHTML = '<div class="box error">❌ notifications.css NOT loaded!</div>';
+            }
+        }
+
+        async function testAPI() {
+            const result = document.getElementById('result3');
+            result.innerHTML = '<p>Testing API...</p>';
+            
+            try {
+                const response = await fetch('/api/notifications');
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.innerHTML = `<div class="box success">✅ API works! Found ${data.unread_count} notifications</div>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    result.innerHTML = '<div class="box error">❌ API returned error</div>';
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="box error">❌ API failed: ${error.message}</div>`;
+            }
+        }
+
+        function openPanel() {
+            const result = document.getElementById('result4');
+            
+            if (typeof toggleNotifications === 'function') {
+                toggleNotifications();
+                result.innerHTML = '<div class="box success">✅ Called toggleNotifications(). Check if panel opened!</div>';
+            } else {
+                result.innerHTML = '<div class="box error">❌ toggleNotifications() function not found!</div>';
+            }
+        }
+
+        // Auto-run checks
+        window.onload = function() {
+            setTimeout(() => {
+                checkPanel();
+                checkCSS();
+            }, 500);
+        };
+    </script>
+</body>
+</html>

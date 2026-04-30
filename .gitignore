@@ -1,0 +1,12 @@
+/vendor/
+/.env
+/storage/logs/*.log
+/storage/cache/*
+/storage/sessions/*
+/public/uploads/medicines/*
+!storage/cache/.gitkeep
+!storage/logs/.gitkeep
+!storage/sessions/.gitkeep
+!public/uploads/medicines/.gitkeep
+composer.lock
+coverage/
