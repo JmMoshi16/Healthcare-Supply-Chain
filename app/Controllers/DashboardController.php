@@ -41,6 +41,9 @@ class DashboardController extends BaseController
         foreach ($allBatches as $b) {
             $totalStockValue += ($b['current_quantity'] * $b['selling_price']);
         }
+        
+        // Get expiring medicines for calendar (next 3 months)
+        $calendarExpirations = $batch->getExpiringByDateRange(date('Y-m-01'), date('Y-m-t', strtotime('+3 months')));
 
         $stats = [
             'total_medicines'     => count($allMedicines),
@@ -56,6 +59,7 @@ class DashboardController extends BaseController
             'recent_transactions' => $recentTransactions,
             'today_transactions'  => count($todayTransactions),
             'total_stock_value'   => $totalStockValue,
+            'calendar_expirations' => $calendarExpirations,
         ];
 
         if (has_role('superadmin')) {

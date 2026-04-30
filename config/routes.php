@@ -14,6 +14,8 @@ use App\Controllers\Api\AuthApiController;
 use App\Controllers\Api\SearchApiController;
 use App\Controllers\Api\MedicineApiController;
 use App\Controllers\NotificationController;
+use App\Controllers\CalendarController;
+use App\Controllers\ExpiryCalendarController;
 
 // Public routes
 $router->get('/', [AuthController::class, 'loginForm']);
@@ -67,4 +69,13 @@ $router->group(['middleware' => [AuthMiddleware::class]], function ($router) {
     $router->get('/api/notifications', [NotificationController::class, 'index']);
     $router->post('/api/notifications/mark-read', [NotificationController::class, 'markAsRead']);
     $router->post('/api/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+    
+    // Calendar
+    $router->get('/api/calendar/notes', [CalendarController::class, 'getNotes']);
+    $router->post('/api/calendar/notes', [CalendarController::class, 'store']);
+    $router->put('/api/calendar/notes', [CalendarController::class, 'update']);
+    $router->delete('/api/calendar/notes', [CalendarController::class, 'delete']);
+    
+    // Expiry Calendar
+    $router->get('/api/calendar/expiring', [ExpiryCalendarController::class, 'getExpiringByMonth']);
 });
