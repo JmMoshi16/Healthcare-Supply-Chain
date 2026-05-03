@@ -1,0 +1,209 @@
+/* ============================================
+   STICKY HEADER AND SIDEBAR FIX
+   ============================================ */
+
+/* Make sidebar fixed */
+.sb-shell {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 600;
+}
+
+/* Make topbar fixed */
+.topbar {
+    position: fixed !important;
+    top: 0;
+    left: 56px;
+    right: 0;
+    z-index: 500;
+    background: var(--bg-sidebar);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sb-shell.pinned ~ .main-wrapper .topbar {
+    left: 266px;
+}
+
+/* Adjust main wrapper to account for fixed sidebar */
+.main-wrapper {
+    margin-left: 56px !important;
+    padding-top: 70px;
+    transition: margin-left 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+
+.sb-shell.pinned ~ .main-wrapper {
+    margin-left: 266px !important;
+}
+
+/* Ensure content wrapper scrolls properly */
+.content-wrapper {
+    height: calc(100vh - 70px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for content */
+.content-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.content-wrapper::-webkit-scrollbar-track {
+    background: var(--bg-surface);
+}
+
+.content-wrapper::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+
+.content-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* Topbar scroll shadow */
+.topbar.scrolled {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Topbar brand pill animation */
+.topbar-brand-pill {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.topbar-brand-pill:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(14,165,233,0.4);
+}
+
+/* Search bar animations */
+.topbar-search-wrap {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.topbar-search-wrap:focus-within {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 4px rgba(14,165,233,0.12), 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.topbar-search-icon {
+    transition: all 0.3s;
+}
+
+.topbar-search-wrap:focus-within .topbar-search-icon {
+    color: var(--accent-orange);
+    transform: scale(1.1);
+}
+
+/* Date display animation */
+.topbar-date {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.topbar-date:hover {
+    background: var(--bg-card);
+    border-color: #ccc;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* Icon buttons animation */
+.topbar-icon-btn {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.topbar-icon-btn:hover {
+    transform: translateY(-3px) scale(1.08);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.topbar-icon-btn:active {
+    transform: translateY(-1px) scale(1.03);
+}
+
+/* Notification badge pulse */
+.topbar-notif-badge {
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
+    }
+}
+
+/* User dropdown animation */
+.topbar-user-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 1000;
+}
+
+.topbar-user-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+/* Dropdown wrapper */
+#topbarDropdownWrap {
+    position: relative;
+    z-index: 1000;
+}
+
+/* Dropdown */
+#topbarDropdown {
+    z-index: 1001 !important;
+}
+
+/* Avatar ring rotation */
+.topbar-avatar-ring {
+    animation: ringRotate 10s linear infinite;
+}
+
+@keyframes ringRotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Online dot pulse */
+.topbar-online-dot {
+    animation: dotPulse 2s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.7;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .main-wrapper {
+        margin-left: 56px !important;
+    }
+    
+    .sb-shell.pinned ~ .main-wrapper {
+        margin-left: 56px !important;
+    }
+    
+    .topbar {
+        left: 56px;
+    }
+    
+    .sb-shell.pinned ~ .main-wrapper .topbar {
+        left: 56px;
+    }
+}

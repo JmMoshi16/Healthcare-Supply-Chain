@@ -1,6 +1,9 @@
 <?php use App\Core\View; View::layout('app'); $title = 'Batches'; ?>
 <?php $totalCount = count($data ?? []); ?>
 
+<link rel="stylesheet" href="/assets/css/batches-advanced.css?v=<?= time() ?>">
+<script src="/assets/js/batches-advanced.js?v=<?= time() ?>" defer></script>
+
 <div class="sl-header">
     <div>
         <h1 class="sl-title">Batches</h1>

@@ -44,8 +44,19 @@ class DashboardController extends BaseController
         
         // Get expiring medicines for calendar (next 3 months)
         $calendarExpirations = $batch->getExpiringByDateRange(date('Y-m-01'), date('Y-m-t', strtotime('+3 months')));
+        
+        // Group by expiry date
+        $groupedExpirations = [];
+        foreach ($calendarExpirations as $item) {
+            $date = $item['expiry_date'];
+            if (!isset($groupedExpirations[$date])) {
+                $groupedExpirations[$date] = [];
+            }
+            $groupedExpirations[$date][] = $item;
+        }
 
         $stats = [
+            'all_medicines'       => $allMedicines,
             'total_medicines'     => count($allMedicines),
             'active_medicines'    => count($activeMedicines),
             'inactive_medicines'  => count($inactiveMedicines),
@@ -59,7 +70,9 @@ class DashboardController extends BaseController
             'recent_transactions' => $recentTransactions,
             'today_transactions'  => count($todayTransactions),
             'total_stock_value'   => $totalStockValue,
-            'calendar_expirations' => $calendarExpirations,
+            'calendar_expirations' => $groupedExpirations,
+            'weekly_stats'        => $stock->getWeeklyStats(),
+            'monthly_stats'       => $stock->getMonthlyStats(),
         ];
 
         if (has_role('superadmin')) {

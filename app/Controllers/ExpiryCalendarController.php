@@ -2,45 +2,38 @@
 
 namespace App\Controllers;
 
-use App\Core\Database;
-use App\Core\Response;
+use App\Core\Request;
+use App\Models\Batch;
 
 class ExpiryCalendarController extends BaseController
 {
-    public function getExpiringByMonth()
+    public function getExpiringByMonth(Request $request)
     {
-        $month = $_GET['month'] ?? date('Y-m');
+        $month = $request->get('month'); // Format: YYYY-MM
         
-        $sql = "SELECT 
-                    b.expiry_date,
-                    m.name as medicine_name,
-                    m.category,
-                    b.batch_number,
-                    b.current_quantity,
-                    m.id as medicine_id,
-                    DATEDIFF(b.expiry_date, CURDATE()) as days_until_expiry
-                FROM batches b
-                INNER JOIN medicines m ON b.medicine_id = m.id
-                WHERE DATE_FORMAT(b.expiry_date, '%Y-%m') = ?
-                AND b.current_quantity > 0
-                ORDER BY b.expiry_date ASC";
-        
-        $stmt = Database::query($sql, [$month]);
-        $expirations = $stmt->fetchAll();
-        
-        // Group by date
+        if (!$month || !preg_match('/^\d{4}-\d{2}$/', $month)) {
+            return $this->json(['success' => false, 'message' => 'Invalid month format'], 400);
+        }
+
+        $batch = new Batch();
+        $expirations = $batch->getExpiringByDateRange(
+            $month . '-01',
+            date('Y-m-t', strtotime($month . '-01'))
+        );
+
+        // Group by expiry date
         $grouped = [];
-        foreach ($expirations as $exp) {
-            $date = $exp['expiry_date'];
+        foreach ($expirations as $item) {
+            $date = $item['expiry_date'];
             if (!isset($grouped[$date])) {
                 $grouped[$date] = [];
             }
-            $grouped[$date][] = $exp;
+            $grouped[$date][] = $item;
         }
-        
-        Response::json([
+
+        return $this->json([
             'success' => true,
-            'expirations' => $grouped
+            'expirations' => $grouped,
         ]);
     }
 }

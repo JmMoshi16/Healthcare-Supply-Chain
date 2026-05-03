@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/premium.css">
+    <link rel="stylesheet" href="/assets/css/sticky-fix.css">
+    <link rel="stylesheet" href="/assets/css/sidebar-advanced.css">
     <link rel="stylesheet" href="/assets/css/topbar-fix.css">
     <link rel="stylesheet" href="/assets/css/notifications.css">
     <link rel="stylesheet" href="/assets/css/calendar.css">
@@ -291,6 +293,357 @@ $isUsers = str_contains($uri, 'users');
 </style>
 
 <script>
+/* Animate Header and Sidebar on Load */
+document.addEventListener('DOMContentLoaded', function() {
+    animateHeaderAndSidebar();
+    addScrollEffect();
+    initSidebarInteractions();
+});
+
+function initSidebarInteractions() {
+    // Add ripple effect to nav items
+    const navItems = document.querySelectorAll('.sb-item');
+    navItems.forEach((item, index) => {
+        // Ripple on click
+        item.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            ripple.classList.add('sb-item-ripple');
+            
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => ripple.remove(), 600);
+        });
+        
+        // Magnetic hover effect
+        item.addEventListener('mousemove', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const deltaX = (x - centerX) / centerX;
+            const deltaY = (y - centerY) / centerY;
+            
+            this.style.transform = `translate(${deltaX * 3}px, ${deltaY * 2}px)`;
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            this.style.transform = 'translate(0, 0)';
+        });
+        
+        // Staggered entrance animation
+        item.style.opacity = '0';
+        item.style.transform = 'translateX(-20px)';
+        setTimeout(() => {
+            item.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+            item.style.opacity = '1';
+            item.style.transform = 'translateX(0)';
+        }, 100 + (index * 50));
+    });
+    
+    // Rail icon advanced interactions
+    const railIcons = document.querySelectorAll('.sb-rail-icon');
+    railIcons.forEach((icon, index) => {
+        // Magnetic effect
+        icon.addEventListener('mousemove', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            
+            this.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px) scale(1.2) rotate(10deg)`;
+        });
+        
+        icon.addEventListener('mouseleave', function() {
+            this.style.transform = 'translate(0, 0) scale(1) rotate(0deg)';
+        });
+        
+        // Click animation
+        icon.addEventListener('click', function() {
+            this.style.animation = 'none';
+            setTimeout(() => {
+                this.style.animation = 'iconBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            }, 10);
+        });
+        
+        // Staggered entrance
+        icon.style.opacity = '0';
+        icon.style.transform = 'translateY(10px)';
+        setTimeout(() => {
+            icon.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+            icon.style.opacity = '1';
+            icon.style.transform = 'translateY(0)';
+        }, 200 + (index * 40));
+    });
+    
+    // User card advanced interaction
+    const userCard = document.querySelector('.sb-user');
+    if (userCard) {
+        // Tilt effect
+        userCard.addEventListener('mousemove', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const rotateX = (y - centerY) / 10;
+            const rotateY = (centerX - x) / 10;
+            
+            this.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            
+            const avatar = this.querySelector('.sb-user-avatar');
+            if (avatar) {
+                avatar.style.transform = `scale(1.15) rotate(${rotateY}deg)`;
+            }
+        });
+        
+        userCard.addEventListener('mouseleave', function() {
+            this.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+            
+            const avatar = this.querySelector('.sb-user-avatar');
+            if (avatar) {
+                avatar.style.transform = 'scale(1) rotate(0deg)';
+            }
+        });
+        
+        // Click pulse
+        userCard.addEventListener('click', function() {
+            this.style.animation = 'none';
+            setTimeout(() => {
+                this.style.animation = 'pulse 0.4s ease-out';
+            }, 10);
+        });
+    }
+    
+    // Logo advanced interactions
+    const logos = document.querySelectorAll('.sb-rail-logo, .sb-panel-logo');
+    logos.forEach(logo => {
+        // Hover 3D effect
+        logo.addEventListener('mousemove', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            
+            this.style.transform = `perspective(500px) rotateY(${x * 0.2}deg) rotateX(${-y * 0.2}deg) scale(1.15)`;
+        });
+        
+        logo.addEventListener('mouseleave', function() {
+            this.style.transform = 'perspective(500px) rotateY(0deg) rotateX(0deg) scale(1)';
+        });
+        
+        // Click bounce
+        logo.addEventListener('click', function() {
+            this.style.animation = 'none';
+            setTimeout(() => {
+                this.style.animation = 'iconBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            }, 10);
+        });
+    });
+    
+    // Pin button enhanced feedback
+    const pinBtn = document.getElementById('sbPinBtn');
+    if (pinBtn) {
+        pinBtn.addEventListener('click', function(e) {
+            // Ripple effect
+            const ripple = document.createElement('span');
+            ripple.style.position = 'absolute';
+            ripple.style.borderRadius = '50%';
+            ripple.style.background = 'rgba(14, 165, 233, 0.5)';
+            ripple.style.width = ripple.style.height = '100px';
+            ripple.style.left = e.offsetX - 50 + 'px';
+            ripple.style.top = e.offsetY - 50 + 'px';
+            ripple.style.transform = 'scale(0)';
+            ripple.style.animation = 'ripple 0.6s ease-out';
+            ripple.style.pointerEvents = 'none';
+            
+            this.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+            
+            // Icon animation
+            const icon = this.querySelector('i');
+            if (icon) {
+                icon.style.animation = 'none';
+                setTimeout(() => {
+                    icon.style.animation = 'iconBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                }, 10);
+            }
+        });
+    }
+    
+    // Switch button advanced interaction
+    const switchBtn = document.querySelector('.sb-switch-btn');
+    if (switchBtn) {
+        switchBtn.addEventListener('click', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Create ripple
+            const ripple = document.createElement('span');
+            ripple.style.position = 'absolute';
+            ripple.style.borderRadius = '50%';
+            ripple.style.background = 'rgba(14, 165, 233, 0.4)';
+            ripple.style.width = ripple.style.height = '200px';
+            ripple.style.left = x - 100 + 'px';
+            ripple.style.top = y - 100 + 'px';
+            ripple.style.transform = 'scale(0)';
+            ripple.style.animation = 'ripple 0.6s ease-out';
+            ripple.style.pointerEvents = 'none';
+            
+            this.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        });
+        
+        // Magnetic hover
+        switchBtn.addEventListener('mousemove', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            
+            this.style.transform = `translate(${x * 0.1}px, ${y * 0.1}px)`;
+        });
+        
+        switchBtn.addEventListener('mouseleave', function() {
+            this.style.transform = 'translate(0, 0)';
+        });
+    }
+    
+    // User buttons enhanced
+    const userBtns = document.querySelectorAll('.sb-user-btn');
+    userBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            // Ripple effect
+            const ripple = document.createElement('span');
+            ripple.style.position = 'absolute';
+            ripple.style.borderRadius = '50%';
+            ripple.style.background = 'rgba(220, 38, 38, 0.4)';
+            ripple.style.width = ripple.style.height = '80px';
+            ripple.style.left = e.offsetX - 40 + 'px';
+            ripple.style.top = e.offsetY - 40 + 'px';
+            ripple.style.transform = 'scale(0)';
+            ripple.style.animation = 'ripple 0.5s ease-out';
+            ripple.style.pointerEvents = 'none';
+            
+            this.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 500);
+        });
+        
+        // Shake on hover
+        btn.addEventListener('mouseenter', function() {
+            this.style.animation = 'shake 0.5s ease-in-out';
+        });
+        
+        btn.addEventListener('animationend', function() {
+            this.style.animation = '';
+        });
+    });
+    
+    // Panel chevron interaction
+    const chevron = document.querySelector('.sb-panel-chevron');
+    if (chevron) {
+        chevron.addEventListener('click', function() {
+            this.style.animation = 'none';
+            setTimeout(() => {
+                this.style.animation = 'spin 0.5s ease-out';
+            }, 10);
+        });
+    }
+    
+    // Add CSS animations dynamically
+    if (!document.getElementById('sidebarAnimations')) {
+        const style = document.createElement('style');
+        style.id = 'sidebarAnimations';
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-3px) rotate(-5deg); }
+                75% { transform: translateX(3px) rotate(5deg); }
+            }
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    // Smooth scroll for sidebar
+    const sbNav = document.querySelector('.sb-nav');
+    if (sbNav) {
+        sbNav.style.scrollBehavior = 'smooth';
+    }
+}
+
+function addScrollEffect() {
+    const contentWrapper = document.querySelector('.content-wrapper');
+    const topbar = document.getElementById('mainTopbar');
+    
+    if (contentWrapper && topbar) {
+        contentWrapper.addEventListener('scroll', function() {
+            if (contentWrapper.scrollTop > 10) {
+                topbar.classList.add('scrolled');
+            } else {
+                topbar.classList.remove('scrolled');
+            }
+        });
+    }
+}
+
+function animateHeaderAndSidebar() {
+    const topbar = document.getElementById('mainTopbar');
+    const sidebar = document.getElementById('sbShell');
+    
+    // Animate topbar
+    if (topbar) {
+        topbar.style.opacity = '0';
+        topbar.style.transform = 'translateY(-20px)';
+        setTimeout(() => {
+            topbar.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+            topbar.style.opacity = '1';
+            topbar.style.transform = 'translateY(0)';
+        }, 100);
+    }
+    
+    // Animate sidebar
+    if (sidebar) {
+        sidebar.style.opacity = '0';
+        sidebar.style.transform = 'translateX(-20px)';
+        setTimeout(() => {
+            sidebar.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+            sidebar.style.opacity = '1';
+            sidebar.style.transform = 'translateX(0)';
+        }, 200);
+    }
+    
+    // Animate sidebar items
+    const sidebarItems = document.querySelectorAll('.sb-rail-icon, .sb-item');
+    sidebarItems.forEach((item, index) => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateX(-10px)';
+        setTimeout(() => {
+            item.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+            item.style.opacity = '1';
+            item.style.transform = 'translateX(0)';
+        }, 400 + (index * 50));
+    });
+}
+
 /* Theme */
 (function(){ if(localStorage.getItem('sbDark')==='true') document.documentElement.setAttribute('data-theme','dark'); })();
 function sbToggleDark(){ const d=document.documentElement.getAttribute('data-theme')==='dark'; document.documentElement.setAttribute('data-theme',d?'light':'dark'); localStorage.setItem('sbDark',String(!d)); }

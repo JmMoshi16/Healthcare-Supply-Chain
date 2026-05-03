@@ -3128,3 +3128,345 @@ body {
 [data-theme='dark'] .search-results-panel {
     box-shadow: 0 20px 60px rgba(0,0,0,0.4);
 }
+
+
+/* ============================================
+   HEADER AND SIDEBAR INTERACTIVE ANIMATIONS
+   ============================================ */
+
+/* Topbar hover effects */
+.topbar {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.topbar-icon-btn {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.topbar-icon-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.topbar-icon-btn:active {
+    transform: translateY(-1px) scale(1.02);
+}
+
+/* Sidebar rail icon animations */
+.sb-rail-icon {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.sb-rail-icon:hover {
+    transform: scale(1.15) rotate(5deg);
+    background: rgba(255,255,255,0.15);
+}
+
+.sb-rail-icon:active {
+    transform: scale(1.05) rotate(0deg);
+}
+
+.sb-rail-icon.active {
+    animation: iconPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes iconPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2) rotate(10deg); }
+    100% { transform: scale(1); }
+}
+
+/* Sidebar panel items */
+.sb-item {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sb-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.sb-item.active {
+    animation: slideInActive 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInActive {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Sidebar logo pulse */
+.sb-rail-logo {
+    animation: logoPulse 3s ease-in-out infinite;
+}
+
+@keyframes logoPulse {
+    0%, 100% {
+        box-shadow: 0 2px 10px rgba(14,165,233,0.4);
+    }
+    50% {
+        box-shadow: 0 4px 20px rgba(14,165,233,0.6);
+    }
+}
+
+.sb-panel-logo {
+    animation: logoPulse 3s ease-in-out infinite;
+}
+
+/* User avatar ring animation */
+.topbar-avatar-ring {
+    animation: ringRotate 8s linear infinite;
+}
+
+@keyframes ringRotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Search bar focus animation */
+.topbar-search-wrap {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.topbar-search-wrap:focus-within {
+    transform: scale(1.02);
+}
+
+/* Notification bell shake */
+.topbar-icon-btn:hover .bi-bell-fill {
+    animation: bellShake 0.5s ease-in-out;
+}
+
+@keyframes bellShake {
+    0%, 100% { transform: rotate(0deg); }
+    10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); }
+    20%, 40%, 60%, 80% { transform: rotate(10deg); }
+}
+
+/* Theme toggle icon spin */
+.topbar-icon-btn:active .bi-moon-stars-fill,
+.topbar-icon-btn:active .bi-circle-half {
+    animation: iconSpin 0.5s ease-in-out;
+}
+
+@keyframes iconSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Sidebar user card hover */
+.sb-user {
+    transition: all 0.3s;
+}
+
+.sb-user:hover {
+    background: var(--bg-surface);
+}
+
+.sb-user-avatar {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.sb-user:hover .sb-user-avatar {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* Online dot pulse */
+.sb-online-dot {
+    animation: dotPulse 2s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.7;
+    }
+}
+
+/* Sidebar switch button */
+.sb-switch-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sb-switch-btn:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Pin button active state */
+.sb-pin-btn.pinned-active {
+    animation: pinPulse 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes pinPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* Topbar brand pill hover */
+.topbar-brand-pill {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.topbar-brand-pill:hover {
+    transform: translateY(-2px) scale(1.02);
+}
+
+/* Date display hover */
+.topbar-date {
+    transition: all 0.3s;
+}
+
+.topbar-date:hover {
+    background: var(--bg-card);
+    border-color: #ccc;
+    transform: translateY(-2px);
+}
+
+/* Dropdown animation */
+.topbar-dropdown {
+    animation: dropdownSlide 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes dropdownSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Dropdown item hover */
+.topbar-dd-item {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.topbar-dd-item:hover {
+    transform: translateX(4px);
+}
+
+/* Sidebar panel slide animation */
+.sb-panel {
+    animation: panelSlide 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes panelSlide {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Search input typing effect */
+.topbar-search-input:focus {
+    animation: inputGlow 0.3s ease-out;
+}
+
+@keyframes inputGlow {
+    from {
+        box-shadow: none;
+    }
+    to {
+        box-shadow: 0 0 0 4px rgba(14,165,233,0.12);
+    }
+}
+
+/* Responsive animations */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+
+/* ============================================
+   STICKY HEADER AND SIDEBAR
+   ============================================ */
+
+/* Make sidebar fixed */
+.sb-shell {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 300;
+}
+
+/* Make topbar sticky */
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+/* Adjust main wrapper to account for fixed sidebar */
+.main-wrapper {
+    margin-left: 56px;
+}
+
+.sb-shell.pinned ~ .main-wrapper {
+    margin-left: 266px;
+}
+
+/* Ensure content wrapper scrolls properly */
+.content-wrapper {
+    height: calc(100vh - 70px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Smooth scrolling */
+.content-wrapper {
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for content */
+.content-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.content-wrapper::-webkit-scrollbar-track {
+    background: var(--bg-surface);
+}
+
+.content-wrapper::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+
+.content-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .main-wrapper {
+        margin-left: 56px;
+    }
+    
+    .sb-shell.pinned ~ .main-wrapper {
+        margin-left: 56px;
+    }
+}

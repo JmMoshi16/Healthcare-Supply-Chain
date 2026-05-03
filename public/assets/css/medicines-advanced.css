@@ -1,0 +1,490 @@
+/* ============================================
+   MEDICINES PAGE - ADVANCED INTERACTIONS
+   Industry-Standard Micro-animations
+   ============================================ */
+
+/* Page entrance animation */
+.content-wrapper {
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Breadcrumb animations */
+.pg-breadcrumb {
+    animation: slideInFromLeft 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInFromLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Add Medicine button enhanced */
+.btn-create-order,
+.clean-btn-primary {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-create-order::before,
+.clean-btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-create-order:hover::before,
+.clean-btn-primary:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-create-order:hover,
+.clean-btn-primary:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 12px 32px rgba(14, 165, 233, 0.4);
+}
+
+.btn-create-order:active,
+.clean-btn-primary:active {
+    transform: translateY(-1px) scale(1.01);
+}
+
+.btn-create-order i,
+.clean-btn-primary i {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-create-order:hover i,
+.clean-btn-primary:hover i {
+    transform: rotate(90deg) scale(1.2);
+}
+
+/* Search bar enhanced */
+.pg-search-wrap {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pg-search-wrap:focus-within {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.pg-search-icon {
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pg-search-wrap:focus-within .pg-search-icon {
+    transform: scale(1.2) rotate(90deg);
+    color: var(--accent-primary);
+}
+
+.pg-search-input {
+    transition: all 0.3s;
+}
+
+.pg-search-input:focus {
+    font-weight: 500;
+}
+
+/* Filter button enhanced */
+.pg-filter-btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pg-filter-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(14, 165, 233, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.5s, height 0.5s;
+}
+
+.pg-filter-btn:hover::before {
+    width: 200px;
+    height: 200px;
+}
+
+.pg-filter-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+}
+
+.pg-filter-btn i {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pg-filter-btn:hover i {
+    transform: rotate(180deg) scale(1.2);
+}
+
+/* Category filter sidebar */
+.pg-filters {
+    animation: slideInFromLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s;
+}
+
+.pg-filters:hover {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* Category radio items */
+.pf-radio {
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pf-radio::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 3px;
+    background: var(--accent-primary);
+    transform: scaleY(0);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pf-radio:hover::before,
+.pf-radio.checked::before {
+    transform: scaleY(1);
+}
+
+.pf-radio:hover {
+    transform: translateX(6px);
+    background: linear-gradient(90deg, rgba(14, 165, 233, 0.08) 0%, transparent 100%);
+}
+
+.pf-radio-dot {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pf-radio:hover .pf-radio-dot {
+    transform: scale(1.2);
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.2);
+}
+
+.pf-radio.checked .pf-radio-dot {
+    animation: checkPulse 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes checkPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+}
+
+/* Medicine cards grid */
+.pg-grid {
+    animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Individual medicine card */
+.pgc {
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: cardSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.pgc:nth-child(1) { animation-delay: 0.05s; }
+.pgc:nth-child(2) { animation-delay: 0.1s; }
+.pgc:nth-child(3) { animation-delay: 0.15s; }
+.pgc:nth-child(4) { animation-delay: 0.2s; }
+.pgc:nth-child(5) { animation-delay: 0.25s; }
+.pgc:nth-child(6) { animation-delay: 0.3s; }
+.pgc:nth-child(7) { animation-delay: 0.35s; }
+.pgc:nth-child(8) { animation-delay: 0.4s; }
+
+@keyframes cardSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.pgc::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.4s;
+    z-index: 0;
+}
+
+.pgc:hover::before {
+    opacity: 1;
+}
+
+.pgc:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.15);
+}
+
+/* Card image hover */
+.pgc-img {
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pgc:hover .pgc-img {
+    transform: scale(1.1) rotate(3deg);
+}
+
+/* Status badge animation */
+.pgc-status-badge {
+    animation: badgeSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+}
+
+@keyframes badgeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+/* Action buttons */
+.pgc-action-btn {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pgc-action-btn:hover {
+    transform: scale(1.15) rotate(10deg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.pgc-action-btn:active {
+    transform: scale(1.05) rotate(5deg);
+}
+
+/* Card category */
+.pgc-category {
+    transition: all 0.3s;
+}
+
+.pgc:hover .pgc-category {
+    color: var(--accent-primary);
+    transform: translateX(2px);
+}
+
+/* Card name */
+.pgc-name {
+    transition: all 0.3s;
+}
+
+.pgc:hover .pgc-name {
+    color: var(--accent-primary);
+    transform: translateX(2px);
+}
+
+/* Card price */
+.pgc-price {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pgc:hover .pgc-price {
+    transform: scale(1.1);
+    color: var(--accent-primary);
+}
+
+/* Icon buttons in card footer */
+.pgc-icon-btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pgc-icon-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(14, 165, 233, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s, height 0.4s;
+}
+
+.pgc-icon-btn:hover::before {
+    width: 100px;
+    height: 100px;
+}
+
+.pgc-icon-btn:hover {
+    transform: scale(1.2) rotate(10deg);
+}
+
+/* Dropdown sections */
+.pf-dropdown-toggle {
+    transition: all 0.3s;
+}
+
+.pf-dropdown-toggle:hover {
+    background: linear-gradient(90deg, rgba(14, 165, 233, 0.05) 0%, transparent 100%);
+    transform: translateX(4px);
+}
+
+.pf-toggle-icon {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pf-dropdown-toggle:hover .pf-toggle-icon {
+    transform: rotate(180deg) scale(1.2);
+}
+
+/* Status filter items */
+.pf-section {
+    animation: sectionSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.pf-section:nth-child(1) { animation-delay: 0.1s; }
+.pf-section:nth-child(2) { animation-delay: 0.2s; }
+
+@keyframes sectionSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Empty state */
+.pg-empty {
+    animation: fadeInScale 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.pg-empty i {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Pagination */
+.page-link {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.page-link:hover {
+    transform: translateY(-3px) scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.page-link.active {
+    animation: pageActive 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes pageActive {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+/* Loading skeleton */
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+}
+
+/* Smooth scroll */
+.content-wrapper {
+    scroll-behavior: smooth;
+}
+
+/* Focus states for accessibility */
+.pgc:focus-visible,
+.pf-radio:focus-visible,
+.pg-filter-btn:focus-visible,
+.btn-create-order:focus-visible {
+    outline: 3px solid var(--accent-primary);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 6px rgba(14, 165, 233, 0.2);
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Responsive enhancements */
+@media (max-width: 768px) {
+    .pgc:hover {
+        transform: translateY(-4px) scale(1.01);
+    }
+}

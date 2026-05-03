@@ -5,6 +5,9 @@ sort($allCategories);
 $totalCount = count($data ?? []);
 ?>
 
+<link rel="stylesheet" href="/assets/css/medicines-advanced.css">
+<script src="/assets/js/medicines-advanced.js"></script>
+
 <!-- Page header -->
 <div class="pg-header">
     <div class="pg-header-left">
