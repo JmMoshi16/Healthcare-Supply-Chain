@@ -4,27 +4,52 @@ namespace App\Controllers\Api;
 
 use App\Controllers\BaseController;
 use App\Core\Request;
+use App\Core\ApiValidator;
+use App\Core\Logger;
 use App\Models\User;
 use App\Models\ApiToken;
 
 class AuthApiController extends BaseController
 {
+    use ApiValidator;
+    
     public function token(Request $request)
     {
-        $data = $request->isJson() ? $request->json() : $request->all();
-
-        if (empty($data['email']) || empty($data['password'])) {
-            return $this->json(['success' => false, 'message' => 'Email and password required'], 422);
-        }
-
-        $user = (new User())->authenticate($data['email'], $data['password']);
+        // Validate input
+        $data = $this->validateRequest($request, [
+            'email'    => 'required|email|max:255',
+            'password' => 'required|min:6|max:255',
+        ]);
+        
+        // Additional XSS prevention
+        $email = filter_var($data['email'], FILTER_SANITIZE_EMAIL);
+        
+        // Authenticate user
+        $user = (new User())->authenticate($email, $data['password']);
 
         if (!$user) {
-            return $this->json(['success' => false, 'message' => 'Invalid credentials'], 401);
+            // Log failed attempt
+            Logger::warning('API authentication failed', [
+                'email' => $email,
+                'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+            ]);
+            
+            return $this->json([
+                'success' => false,
+                'message' => 'Invalid credentials'
+            ], 401);
         }
-
+        
+        // Generate token
         $token     = (new ApiToken())->generate((int) $user['id']);
         $expiresAt = date('Y-m-d\TH:i:s\Z', strtotime('+24 hours'));
+        
+        // Log successful authentication
+        Logger::info('API token generated', [
+            'user_id' => $user['id'],
+            'email' => $email,
+            'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+        ]);
 
         return $this->json([
             'success'    => true,

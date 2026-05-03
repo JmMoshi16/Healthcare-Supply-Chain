@@ -42,4 +42,17 @@ class Medicine extends BaseModel
 
         return \App\Core\Database::query($sql, [$threshold])->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    public function getMedicineStats(): array
+    {
+        $sql = "
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active,
+                SUM(CASE WHEN is_active = 0 THEN 1 ELSE 0 END) as inactive
+            FROM medicines
+        ";
+
+        return \App\Core\Database::query($sql)->fetch(\PDO::FETCH_ASSOC) ?: [];
+    }
 }

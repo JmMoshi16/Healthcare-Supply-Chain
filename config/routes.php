@@ -4,6 +4,7 @@ use App\Middleware\AuthMiddleware;
 use App\Middleware\CsrfMiddleware;
 use App\Middleware\RoleMiddleware;
 use App\Middleware\ApiAuthMiddleware;
+use App\Middleware\RateLimitMiddleware;
 use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
 use App\Controllers\MedicineController;
@@ -42,16 +43,31 @@ $router->group(['middleware' => [AuthMiddleware::class, CsrfMiddleware::class]],
     $router->delete('/users/{id}', [UserController::class, 'destroy']);
 });
 
-// API routes
+// API routes with rate limiting
 $router->group(['prefix' => 'api/v1'], function ($router) {
-    // Test route
+    // Test route (global rate limit)
     $router->get('/test', function() {
         return new \App\Core\Response(['success' => true, 'message' => 'API is working!']);
     });
     
-    $router->post('/auth/token', [AuthApiController::class, 'token']);
+    // Auth endpoint with strict rate limit (5 per minute)
+    $authRateLimit = new RateLimitMiddleware([
+        'max_attempts' => 5,
+        'decay_seconds' => 60,
+        'identifier' => 'ip',
+        'prefix' => 'api_auth',
+    ]);
+    $router->post('/auth/token', [AuthApiController::class, 'token'], ['middleware' => [$authRateLimit]]);
 
-    $router->group(['middleware' => [ApiAuthMiddleware::class]], function ($router) {
+    // Protected API routes with moderate rate limit (60 per minute)
+    $apiRateLimit = new RateLimitMiddleware([
+        'max_attempts' => 60,
+        'decay_seconds' => 60,
+        'identifier' => 'token',
+        'prefix' => 'api_general',
+    ]);
+    
+    $router->group(['middleware' => [ApiAuthMiddleware::class, $apiRateLimit]], function ($router) {
         $router->get('/medicines', [MedicineApiController::class, 'index']);
         $router->get('/medicines/{id}', [MedicineApiController::class, 'show']);
         $router->get('/medicines/{id}/stock', [MedicineApiController::class, 'stock']);
@@ -60,8 +76,15 @@ $router->group(['prefix' => 'api/v1'], function ($router) {
     });
 });
 
-// Public search API (requires auth)
-$router->group(['middleware' => [AuthMiddleware::class]], function ($router) {
+// Public search API with rate limiting (30 per minute)
+$searchRateLimit = new RateLimitMiddleware([
+    'max_attempts' => 30,
+    'decay_seconds' => 60,
+    'identifier' => 'ip',
+    'prefix' => 'api_search',
+]);
+
+$router->group(['middleware' => [AuthMiddleware::class, $searchRateLimit]], function ($router) {
     $router->get('/api/search', [SearchApiController::class, 'search']);
     $router->post('/api/medicines/{id}/toggle-status', [MedicineApiController::class, 'toggleStatus']);
     

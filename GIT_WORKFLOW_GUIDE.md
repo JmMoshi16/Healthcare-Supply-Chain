@@ -170,8 +170,8 @@ git branch
 
 ## 🎯 Target Goals
 
-- ✅ **20-30 commits** per member
 - ✅ **Commit daily** (not all at once!)
+- ✅ **5-10git branch -M main commits** per member
 - ✅ **Clear commit messages**
 - ✅ **Push regularly** so team can see progress
 
