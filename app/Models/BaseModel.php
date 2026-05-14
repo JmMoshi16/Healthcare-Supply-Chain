@@ -13,9 +13,17 @@ abstract class BaseModel
     protected array $hidden = [];
     protected array $rules = [];
     
+    protected bool $timestamps = true;
+    protected bool $useSoftDeletes = false;
+    protected bool $logActivities = false;
+    
     public function query(): QueryBuilder
     {
-        return new QueryBuilder($this->table);
+        $query = new QueryBuilder($this->table);
+        if ($this->useSoftDeletes) {
+            $query->whereNull('deleted_at');
+        }
+        return $query;
     }
     
     public function all(): array
@@ -45,23 +53,72 @@ abstract class BaseModel
             }
         }
         
-        $data['created_at'] = now();
-        $data['updated_at'] = now();
+        if ($this->timestamps) {
+            $data['created_at'] = now();
+            $data['updated_at'] = now();
+        }
         
-        return $this->query()->insert($data);
+        $id = $this->query()->insert($data);
+        
+        $this->logActivity('create', $id, null, $data);
+        
+        return $id;
     }
     
     public function update(int $id, array $data): bool
     {
-        $data = $this->filterFillable($data);
-        $data['updated_at'] = now();
+        $oldData = $this->find($id);
         
-        return $this->query()->where($this->primaryKey, $id)->update($data);
+        $data = $this->filterFillable($data);
+        if ($this->timestamps) {
+            $data['updated_at'] = now();
+        }
+        
+        $success = $this->query()->where($this->primaryKey, $id)->update($data);
+        
+        if ($success) {
+            $this->logActivity('update', $id, $oldData, $data);
+        }
+        
+        return $success;
     }
     
     public function delete(int $id): bool
     {
-        return $this->query()->where($this->primaryKey, $id)->delete();
+        $oldData = $this->find($id);
+        
+        if ($this->useSoftDeletes) {
+            $success = $this->query()->where($this->primaryKey, $id)->update(['deleted_at' => now()]);
+        } else {
+            $success = $this->query()->where($this->primaryKey, $id)->delete();
+        }
+        
+        if ($success) {
+            $this->logActivity('delete', $id, $oldData, null);
+        }
+        
+        return $success;
+    }
+    
+    protected function logActivity(string $action, int $modelId, ?array $oldData, ?array $newData): void
+    {
+        if (!$this->logActivities) {
+            return;
+        }
+        
+        $userId = auth()['id'] ?? null;
+        $ipAddress = $_SERVER['REMOTE_ADDR'] ?? null;
+        
+        $activityLog = new ActivityLog();
+        $activityLog->create([
+            'user_id' => $userId,
+            'action' => $action,
+            'model' => basename(str_replace('\\', '/', static::class)),
+            'model_id' => $modelId,
+            'old_data' => $oldData ? json_encode($oldData) : null,
+            'new_data' => $newData ? json_encode($newData) : null,
+            'ip_address' => $ipAddress
+        ]);
     }
     
     public function paginate(int $perPage = 20, int $page = 1): array

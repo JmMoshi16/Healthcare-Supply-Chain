@@ -5,6 +5,8 @@ namespace App\Models;
 class User extends BaseModel
 {
     protected string $table = 'users';
+    protected bool $useSoftDeletes = true;
+    protected bool $logActivities = true;
 
     protected array $fillable = [
         'fullname',
@@ -34,7 +36,7 @@ class User extends BaseModel
 
         // Fetch raw row (including password hash) directly via PDO
         $stmt = \App\Core\Database::query(
-            "SELECT * FROM users WHERE email = ? LIMIT 1",
+            "SELECT * FROM users WHERE email = ? AND deleted_at IS NULL LIMIT 1",
             [$email]
         );
         $raw = $stmt->fetch(\PDO::FETCH_ASSOC);

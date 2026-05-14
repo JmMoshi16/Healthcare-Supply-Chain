@@ -5,6 +5,8 @@ namespace App\Models;
 class Batch extends BaseModel
 {
     protected string $table = 'batches';
+    protected bool $useSoftDeletes = true;
+    protected bool $logActivities = true;
 
     protected array $fillable = [
         'medicine_id', 'batch_number', 'manufacturing_date', 'expiry_date',
@@ -29,6 +31,8 @@ class Batch extends BaseModel
             WHERE b.expiry_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL ? DAY)
               AND b.status = 'active'
               AND b.current_quantity > 0
+              AND b.deleted_at IS NULL
+              AND m.deleted_at IS NULL
             ORDER BY b.expiry_date ASC
         ";
 
@@ -49,6 +53,8 @@ class Batch extends BaseModel
             WHERE b.expiry_date BETWEEN ? AND ?
               AND b.status = 'active'
               AND b.current_quantity > 0
+              AND b.deleted_at IS NULL
+              AND m.deleted_at IS NULL
             ORDER BY b.expiry_date ASC
         ";
 

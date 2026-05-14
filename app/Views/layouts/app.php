@@ -24,6 +24,7 @@ $isMed   = str_contains($uri, 'medicines');
 $isBatch = str_contains($uri, 'batches');
 $isStock = str_contains($uri, 'stocks');
 $isUsers = str_contains($uri, 'users');
+$isActivityLogs = str_contains($uri, 'activity-logs');
 ?>
 
 <!-- ═══════════════════════════════════════
@@ -47,6 +48,7 @@ $isUsers = str_contains($uri, 'users');
             <?php if (has_role('superadmin')): ?>
             <div class="sb-rail-sep"></div>
             <button class="sb-rail-icon <?= $isUsers ? 'active' : '' ?>" onclick="location.href='/users'"           title="Users"><i class="bi bi-people"></i></button>
+            <button class="sb-rail-icon <?= $isActivityLogs ? 'active' : '' ?>" onclick="location.href='/activity-logs'" title="Activity Logs"><i class="bi bi-clock-history"></i></button>
             <?php endif; ?>
         </div>
         <div class="sb-rail-bottom">
@@ -85,6 +87,7 @@ $isUsers = str_contains($uri, 'users');
             <?php if (has_role('superadmin')): ?>
             <div class="sb-rail-sep" style="width:100%;margin:.4rem 0;"></div>
             <a href="/users" class="sb-item <?= $isUsers ? 'active' : '' ?>"><i class="bi bi-people<?= $isUsers ? '-fill' : '' ?>"></i><span>Users</span></a>
+            <a href="/activity-logs" class="sb-item <?= $isActivityLogs ? 'active' : '' ?>"><i class="bi bi-clock-history"></i><span>Activity Logs</span></a>
             <?php endif; ?>
         </nav>
 

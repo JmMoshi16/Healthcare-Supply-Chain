@@ -37,6 +37,18 @@ class QueryBuilder
         return $this;
     }
     
+    public function whereNull(string $column): self
+    {
+        $this->wheres[] = "{$column} IS NULL";
+        return $this;
+    }
+    
+    public function whereNotNull(string $column): self
+    {
+        $this->wheres[] = "{$column} IS NOT NULL";
+        return $this;
+    }
+    
     public function orWhere(string $column, $operator, $value = null): self
     {
         if ($value === null) {

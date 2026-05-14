@@ -10,6 +10,7 @@ use App\Controllers\MedicineController;
 use App\Controllers\BatchController;
 use App\Controllers\StockController;
 use App\Controllers\UserController;
+use App\Controllers\ActivityLogController;
 use App\Controllers\Api\AuthApiController;
 use App\Controllers\Api\SearchApiController;
 use App\Controllers\Api\MedicineApiController;
@@ -40,6 +41,8 @@ $router->group(['middleware' => [AuthMiddleware::class, CsrfMiddleware::class]],
     $router->get('/users/{id}/edit', [UserController::class, 'edit']);
     $router->put('/users/{id}', [UserController::class, 'update']);
     $router->delete('/users/{id}', [UserController::class, 'destroy']);
+
+    $router->get('/activity-logs', [ActivityLogController::class, 'index']);
 });
 
 // API routes
