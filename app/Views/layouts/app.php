@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= esc($title ?? 'Healthcare Supply Chain') ?></title>
+    <meta name="csrf-token" content="<?= csrf_token() ?>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/premium.css">
@@ -24,6 +25,7 @@ $isMed   = str_contains($uri, 'medicines');
 $isBatch = str_contains($uri, 'batches');
 $isStock = str_contains($uri, 'stocks');
 $isUsers = str_contains($uri, 'users');
+$isEmail = str_contains($uri, 'emails');
 ?>
 
 <!-- ═══════════════════════════════════════
@@ -47,6 +49,7 @@ $isUsers = str_contains($uri, 'users');
             <?php if (has_role('superadmin')): ?>
             <div class="sb-rail-sep"></div>
             <button class="sb-rail-icon <?= $isUsers ? 'active' : '' ?>" onclick="location.href='/users'"           title="Users"><i class="bi bi-people"></i></button>
+            <button class="sb-rail-icon <?= $isEmail ? 'active' : '' ?>" onclick="location.href='/emails'"          title="Email Management"><i class="bi bi-envelope"></i></button>
             <?php endif; ?>
         </div>
         <div class="sb-rail-bottom">
@@ -85,6 +88,7 @@ $isUsers = str_contains($uri, 'users');
             <?php if (has_role('superadmin')): ?>
             <div class="sb-rail-sep" style="width:100%;margin:.4rem 0;"></div>
             <a href="/users" class="sb-item <?= $isUsers ? 'active' : '' ?>"><i class="bi bi-people<?= $isUsers ? '-fill' : '' ?>"></i><span>Users</span></a>
+            <a href="/emails" class="sb-item <?= $isEmail ? 'active' : '' ?>"><i class="bi bi-envelope<?= $isEmail ? '-fill' : '' ?>"></i><span>Email Management</span></a>
             <?php endif; ?>
         </nav>
 
