@@ -5,7 +5,7 @@
 <div class="page-header" style="margin-bottom:1.75rem;">
     <div>
         <h1 class="page-title">Record Transaction</h1>
-        <p class="page-subtitle">Select a batch, choose transaction type, and enter quantity</p>
+        <p class="page-subtitle">Select a batch, choose transaction type, and enter details</p>
     </div>
 </div>
 
@@ -43,7 +43,7 @@
                                         <option value="<?= (int)$b['id'] ?>"
                                             data-stock="<?= (int)$b['current_quantity'] ?>"
                                             <?= old('batch_id') == $b['id'] ? 'selected' : '' ?>>
-                                            <?= esc($b['batch_number']) ?> (Stock: <?= (int)$b['current_quantity'] ?>)
+                                            <?= esc($b['batch_number']) ?> — <?= esc($b['medicine_name'] ?? '') ?> (Stock: <?= (int)$b['current_quantity'] ?>)
                                         </option>
                                         <?php endforeach; ?>
                                     </select>
@@ -53,32 +53,49 @@
                         </div>
                     </div>
 
-                    <!-- Step 2: Type -->
+                    <!-- Step 2: Type + Reason Code -->
                     <div class="sl-form-step">
                         <div class="sl-step-num">2</div>
                         <div class="sl-step-body">
-                            <div class="form-group">
-                                <label class="form-label">Transaction Type <span class="pf-required">*</span></label>
-                                <div class="sl-variant-chips" style="margin-top:.5rem;">
-                                    <div class="sl-variant-chip" onclick="selectType('in')">📥 Stock In</div>
-                                    <div class="sl-variant-chip" onclick="selectType('out')">📤 Stock Out</div>
-                                    <div class="sl-variant-chip" onclick="selectType('adjustment')">🔧 Adjustment</div>
+                            <div class="pf-row">
+                                <div class="pf-col-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Transaction Type <span class="pf-required">*</span></label>
+                                        <div class="sl-select-wrap">
+                                            <i class="bi bi-arrow-left-right sl-select-icon"></i>
+                                            <select name="transaction_type" id="typeSelect" class="form-input sl-has-icon" required onchange="syncReasonCodes(this.value)">
+                                                <option value="">Select type...</option>
+                                                <option value="in"         <?= old('transaction_type') === 'in'         ? 'selected' : '' ?>>Stock In</option>
+                                                <option value="out"        <?= old('transaction_type') === 'out'        ? 'selected' : '' ?>>Stock Out</option>
+                                                <option value="adjustment" <?= old('transaction_type') === 'adjustment' ? 'selected' : '' ?>>Adjustment</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="sl-select-wrap" style="margin-top:.75rem;">
-                                    <i class="bi bi-arrow-left-right sl-select-icon"></i>
-                                    <select name="transaction_type" id="typeSelect" class="form-input sl-has-icon" required onchange="syncTypeChips(this.value)">
-                                        <option value="">Select type...</option>
-                                        <option value="in" <?= old('transaction_type') === 'in' ? 'selected' : '' ?>>Stock In</option>
-                                        <option value="out" <?= old('transaction_type') === 'out' ? 'selected' : '' ?>>Stock Out</option>
-                                        <option value="adjustment" <?= old('transaction_type') === 'adjustment' ? 'selected' : '' ?>>Adjustment</option>
-                                    </select>
+                                <div class="pf-col-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Reason Code <span class="pf-required">*</span></label>
+                                        <div class="sl-select-wrap">
+                                            <i class="bi bi-tag sl-select-icon"></i>
+                                            <select name="reason_code" id="reasonCodeSelect" class="form-input sl-has-icon" required>
+                                                <option value="">Select reason...</option>
+                                                <option value="purchase"   <?= old('reason_code') === 'purchase'   ? 'selected' : '' ?>>Purchase</option>
+                                                <option value="dispensing" <?= old('reason_code') === 'dispensing' ? 'selected' : '' ?>>Dispensing</option>
+                                                <option value="return"     <?= old('reason_code') === 'return'     ? 'selected' : '' ?>>Return</option>
+                                                <option value="damaged"    <?= old('reason_code') === 'damaged'    ? 'selected' : '' ?>>Damaged</option>
+                                                <option value="expired"    <?= old('reason_code') === 'expired'    ? 'selected' : '' ?>>Expired Disposal</option>
+                                                <option value="adjustment" <?= old('reason_code') === 'adjustment' ? 'selected' : '' ?>>Adjustment</option>
+                                                <option value="transfer"   <?= old('reason_code') === 'transfer'   ? 'selected' : '' ?>>Transfer</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Step 3: Quantity + Reason -->
-                    <div class="sl-form-step" style="border-bottom:none;margin-bottom:0;padding-bottom:0;">
+                    <!-- Step 3: Quantity + Reference -->
+                    <div class="sl-form-step">
                         <div class="sl-step-num">3</div>
                         <div class="sl-step-body">
                             <div class="pf-row">
@@ -94,10 +111,42 @@
                                 </div>
                                 <div class="pf-col-6">
                                     <div class="form-group">
-                                        <label class="form-label">Reason</label>
-                                        <input type="text" name="reason" class="form-input" placeholder="e.g. Received from supplier" value="<?= esc(old('reason')) ?>">
+                                        <label class="form-label">Reference Number</label>
+                                        <input type="text" name="reference_number" class="form-input" placeholder="e.g. PO-2024-001" value="<?= esc(old('reference_number')) ?>">
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Recipient + Ward (shown for out/transfer) -->
+                    <div class="sl-form-step" id="recipientStep">
+                        <div class="sl-step-num">4</div>
+                        <div class="sl-step-body">
+                            <div class="pf-row">
+                                <div class="pf-col-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Recipient</label>
+                                        <input type="text" name="recipient" class="form-input" placeholder="e.g. Dr. Smith / Patient ID" value="<?= esc(old('recipient')) ?>">
+                                    </div>
+                                </div>
+                                <div class="pf-col-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Ward / Department</label>
+                                        <input type="text" name="ward_department" class="form-input" placeholder="e.g. ICU, Pharmacy, Ward 3" value="<?= esc(old('ward_department')) ?>">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 5: Notes -->
+                    <div class="sl-form-step" style="border-bottom:none;margin-bottom:0;padding-bottom:0;">
+                        <div class="sl-step-num">5</div>
+                        <div class="sl-step-body">
+                            <div class="form-group">
+                                <label class="form-label">Notes</label>
+                                <input type="text" name="reason" class="form-input" placeholder="Additional notes…" value="<?= esc(old('reason')) ?>">
                             </div>
                         </div>
                     </div>
@@ -119,7 +168,7 @@
         </div>
     </div>
 
-    <!-- RIGHT: Summary + Tips -->
+    <!-- RIGHT: Summary -->
     <div class="pf-form-side">
         <div class="card sl-summary-card">
             <div class="card-header">
@@ -136,8 +185,16 @@
                     <span class="sl-summary-val" id="sumType">—</span>
                 </div>
                 <div class="sl-summary-item">
+                    <span class="sl-summary-label">Reason Code</span>
+                    <span class="sl-summary-val" id="sumCode">—</span>
+                </div>
+                <div class="sl-summary-item">
                     <span class="sl-summary-label">Quantity</span>
                     <span class="sl-summary-val" id="sumQty">—</span>
+                </div>
+                <div class="sl-summary-item">
+                    <span class="sl-summary-label">Recipient</span>
+                    <span class="sl-summary-val" id="sumRecipient">—</span>
                 </div>
                 <div class="sl-summary-divider"></div>
                 <div class="sl-summary-item sl-summary-total">
@@ -149,16 +206,17 @@
 
         <div class="card" style="margin-top:1rem;">
             <div class="card-header">
-                <span class="card-title">Transaction Guide</span>
+                <span class="card-title">Reason Code Guide</span>
                 <i class="bi bi-info-circle" style="color:var(--text-muted);"></i>
             </div>
             <div style="padding:1.25rem;">
                 <ul class="pf-tips-list">
-                    <li><i class="bi bi-check-circle-fill" style="color:var(--accent-orange);"></i> Stock In — adds to current quantity</li>
-                    <li><i class="bi bi-check-circle-fill" style="color:var(--accent-orange);"></i> Stock Out — deducts from current quantity</li>
-                    <li><i class="bi bi-check-circle-fill" style="color:var(--accent-orange);"></i> Adjustment — corrects stock discrepancies</li>
-                    <li><i class="bi bi-check-circle-fill" style="color:var(--accent-orange);"></i> All transactions are logged with your user ID</li>
-                    <li><i class="bi bi-check-circle-fill" style="color:var(--accent-orange);"></i> Cannot exceed available stock on Stock Out</li>
+                    <li><i class="bi bi-check-circle-fill" style="color:var(--accent-orange);"></i> <strong>Purchase</strong> — received from supplier</li>
+                    <li><i class="bi bi-check-circle-fill" style="color:var(--accent-orange);"></i> <strong>Dispensing</strong> — given to patient/ward</li>
+                    <li><i class="bi bi-check-circle-fill" style="color:var(--accent-orange);"></i> <strong>Return</strong> — returned from ward</li>
+                    <li><i class="bi bi-check-circle-fill" style="color:var(--accent-orange);"></i> <strong>Damaged</strong> — removed due to damage</li>
+                    <li><i class="bi bi-check-circle-fill" style="color:var(--accent-orange);"></i> <strong>Expired</strong> — disposed expired stock</li>
+                    <li><i class="bi bi-check-circle-fill" style="color:var(--accent-orange);"></i> <strong>Transfer</strong> — moved between departments</li>
                 </ul>
             </div>
         </div>
@@ -166,33 +224,46 @@
 </div>
 
 <script>
-const batchSelect = document.getElementById('batchSelect');
-const typeSelect  = document.getElementById('typeSelect');
-const qtyInput    = document.getElementById('quantityInput');
+const batchSelect  = document.getElementById('batchSelect');
+const typeSelect   = document.getElementById('typeSelect');
+const rcSelect     = document.getElementById('reasonCodeSelect');
+const qtyInput     = document.getElementById('quantityInput');
+
+// Reason codes per transaction type
+const rcMap = {
+    in:         ['purchase','return','adjustment','transfer'],
+    out:        ['dispensing','damaged','expired','adjustment','transfer'],
+    adjustment: ['adjustment','damaged','expired'],
+};
 
 batchSelect.addEventListener('change', function(){
-    const opt = this.selectedOptions[0];
+    const opt   = this.selectedOptions[0];
     const stock = opt?.dataset.stock || '—';
-    document.getElementById('stockInfo').textContent = opt?.value ? `Current stock: ${stock} units` : '';
+    document.getElementById('stockInfo').textContent    = opt?.value ? `Current stock: ${stock} units` : '';
     document.getElementById('currentStock').textContent = opt?.value ? stock : '—';
-    document.getElementById('sumBatch').textContent = opt?.value ? opt.textContent.split('(')[0].trim() : '—';
-    document.getElementById('sumStock').textContent = opt?.value ? stock : '—';
+    document.getElementById('sumBatch').textContent     = opt?.value ? opt.textContent.split('(')[0].trim() : '—';
+    document.getElementById('sumStock').textContent     = opt?.value ? stock : '—';
 });
 
-typeSelect.addEventListener('change', function(){ syncTypeChips(this.value); updateSummary(); });
+typeSelect.addEventListener('change', function(){ syncReasonCodes(this.value); updateSummary(); });
+rcSelect.addEventListener('change', updateSummary);
 qtyInput.addEventListener('input', updateSummary);
+document.querySelector('[name=recipient]').addEventListener('input', function(){ document.getElementById('sumRecipient').textContent = this.value || '—'; });
 
-function syncTypeChips(val){
-    document.querySelectorAll('.sl-variant-chip').forEach(c => c.classList.toggle('active', c.textContent.toLowerCase().includes(val)));
-}
-function selectType(val){
-    typeSelect.value = val;
-    syncTypeChips(val);
+function syncReasonCodes(type){
+    const allowed = rcMap[type] || [];
+    Array.from(rcSelect.options).forEach(o => {
+        if (!o.value) return;
+        o.hidden = allowed.length > 0 && !allowed.includes(o.value);
+    });
+    if (rcSelect.selectedOptions[0]?.hidden) rcSelect.value = '';
     updateSummary();
 }
+
 function updateSummary(){
     document.getElementById('sumType').textContent = typeSelect.value || '—';
-    document.getElementById('sumQty').textContent  = qtyInput.value || '—';
+    document.getElementById('sumCode').textContent = rcSelect.value  || '—';
+    document.getElementById('sumQty').textContent  = qtyInput.value  || '—';
 }
 
 document.getElementById('qtyMinus').addEventListener('click', () => { const v = parseInt(qtyInput.value)||1; if(v>1){ qtyInput.value=v-1; updateSummary(); } });
