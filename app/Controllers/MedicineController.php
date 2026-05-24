@@ -6,6 +6,7 @@ use App\Core\Request;
 use App\Core\Session;
 use App\Core\Validator;
 use App\Models\Medicine;
+use App\Models\Category;
 
 class MedicineController extends BaseController
 {
@@ -44,7 +45,8 @@ class MedicineController extends BaseController
             return $this->redirect('/medicines');
         }
 
-        return $this->view('medicines/create');
+        $categories = (new Category())->all();
+        return $this->view('medicines/create', ['categories' => $categories]);
     }
 
     public function store(Request $request)
@@ -58,9 +60,9 @@ class MedicineController extends BaseController
         $validator = new Validator($data);
 
         if (!$validator->validate([
-            'name'     => 'required|min:3|max:255',
-            'category' => 'required',
-            'unit'     => 'required',
+            'name'        => 'required|min:3|max:255',
+            'category_id' => 'required|numeric',
+            'unit'        => 'required',
         ])) {
             Session::flash('errors', $validator->errors());
             Session::flash('old_input', $data);
@@ -102,7 +104,8 @@ class MedicineController extends BaseController
             return $this->redirect('/medicines');
         }
 
-        return $this->view('medicines/edit', ['medicine' => $medicine]);
+        $categories = (new Category())->all();
+        return $this->view('medicines/edit', ['medicine' => $medicine, 'categories' => $categories]);
     }
 
     public function update(Request $request, string $id)
@@ -116,9 +119,9 @@ class MedicineController extends BaseController
         $validator = new Validator($data);
 
         if (!$validator->validate([
-            'name'     => 'required|min:3|max:255',
-            'category' => 'required',
-            'unit'     => 'required',
+            'name'        => 'required|min:3|max:255',
+            'category_id' => 'required|numeric',
+            'unit'        => 'required',
         ])) {
             Session::flash('errors', $validator->errors());
             return $this->redirect("/medicines/{$id}/edit");

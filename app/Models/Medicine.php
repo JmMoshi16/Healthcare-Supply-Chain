@@ -7,7 +7,7 @@ class Medicine extends BaseModel
     protected string $table = 'medicines';
 
     protected array $fillable = [
-        'name', 'generic_name', 'category', 'description', 'unit', 'image', 'is_active',
+        'name', 'generic_name', 'category_id', 'description', 'unit', 'image', 'is_active',
     ];
 
     public function withBatches(int $id): ?array

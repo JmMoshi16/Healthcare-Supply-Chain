@@ -4,6 +4,7 @@ use App\Middleware\AuthMiddleware;
 use App\Middleware\CsrfMiddleware;
 use App\Middleware\RoleMiddleware;
 use App\Middleware\ApiAuthMiddleware;
+use App\Middleware\ApiRateLimitMiddleware;
 use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
 use App\Controllers\MedicineController;
@@ -51,7 +52,7 @@ $router->group(['prefix' => 'api/v1'], function ($router) {
     
     $router->post('/auth/token', [AuthApiController::class, 'token']);
 
-    $router->group(['middleware' => [ApiAuthMiddleware::class]], function ($router) {
+    $router->group(['middleware' => [new ApiRateLimitMiddleware(60, 60), new ApiAuthMiddleware('read')]], function ($router) {
         $router->get('/medicines', [MedicineApiController::class, 'index']);
         $router->get('/medicines/{id}', [MedicineApiController::class, 'show']);
         $router->get('/medicines/{id}/stock', [MedicineApiController::class, 'stock']);
