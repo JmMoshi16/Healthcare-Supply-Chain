@@ -19,6 +19,7 @@ use App\Controllers\NotificationController;
 use App\Controllers\CalendarController;
 use App\Controllers\ExpiryCalendarController;
 use App\Controllers\ReorderController;
+use App\Controllers\EmailController;
 
 // Public routes
 $router->get('/', [AuthController::class, 'loginForm']);
@@ -46,6 +47,14 @@ $router->group(['middleware' => [AuthMiddleware::class, CsrfMiddleware::class]],
     $router->delete('/users/{id}', [UserController::class, 'destroy']);
 
     $router->get('/activity-logs', [ActivityLogController::class, 'index']);
+
+    // Email management (superadmin only)
+    $router->get('/emails', [EmailController::class, 'index']);
+    $router->post('/emails/test', [EmailController::class, 'test']);
+    $router->post('/emails/send-expiry-alerts', [EmailController::class, 'sendExpiryAlerts']);
+    $router->post('/emails/send-low-stock-alerts', [EmailController::class, 'sendLowStockAlerts']);
+    $router->post('/emails/send-daily-report', [EmailController::class, 'sendDailyReport']);
+    $router->post('/emails/send-weekly-report', [EmailController::class, 'sendWeeklyReport']);
 });
 
 // API routes

@@ -11,8 +11,12 @@ $pdo = new PDO(
     [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
 );
 
-$seeders = glob(__DIR__ . '/seeders/*.php');
-sort($seeders);
+$seeders = [
+    __DIR__ . '/seeders/UserSeeder.php',
+    __DIR__ . '/seeders/MedicineSeeder.php',
+    __DIR__ . '/seeders/BatchSeeder.php',
+    __DIR__ . '/seeders/StockSeeder.php',
+];
 
 foreach ($seeders as $file) {
     $seeder = require $file;

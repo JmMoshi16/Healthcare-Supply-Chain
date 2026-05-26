@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\Request;
 use App\Core\Session;
 use App\Core\Validator;
+use App\Core\AlertService;
 use App\Models\User;
 
 class AuthController extends BaseController
@@ -107,13 +108,23 @@ class AuthController extends BaseController
         }
 
         // Create user
-        $this->user->create([
+        $userId = $this->user->create([
             'fullname'  => clean($data['fullname']),
             'email'     => strtolower(trim($data['email'])),
             'password'  => $data['password'],
             'role'      => $data['role'],
             'is_active' => 1,
         ]);
+
+        // Send welcome email
+        try {
+            $alertService = new AlertService();
+            $newUser = $this->user->find($userId);
+            $alertService->sendWelcomeEmail($newUser);
+        } catch (\Exception $e) {
+            // Log error but don't fail registration
+            error_log("Failed to send welcome email: " . $e->getMessage());
+        }
 
         Session::flash('success', 'Account created successfully! Please sign in.');
         return $this->redirect('/login');

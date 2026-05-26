@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\Request;
 use App\Core\Session;
 use App\Core\Validator;
+use App\Core\AlertService;
 use App\Models\Batch;
 use App\Models\Medicine;
 
@@ -117,8 +118,28 @@ class BatchController extends BaseController
             return $this->redirect("/batches/{$id}/edit");
         }
 
+        // Check if status changed to 'recalled'
+        $oldBatch = $this->batch->find((int) $id);
+        $statusChanged = isset($data['status']) && 
+                        $data['status'] === 'recalled' && 
+                        $oldBatch['status'] !== 'recalled';
+
         $this->batch->update((int) $id, $data);
-        flash('success', 'Batch updated successfully');
+
+        // Send recall notification if status changed to recalled
+        if ($statusChanged) {
+            try {
+                $alertService = new AlertService();
+                $reason = $data['recall_reason'] ?? 'Quality control issue';
+                $alertService->sendBatchRecallNotification((int) $id, $reason, auth()['id']);
+                flash('success', 'Batch recalled and notifications sent to all users');
+            } catch (\Exception $e) {
+                flash('warning', 'Batch recalled but email notifications failed');
+            }
+        } else {
+            flash('success', 'Batch updated successfully');
+        }
+
         return $this->redirect('/batches');
     }
 

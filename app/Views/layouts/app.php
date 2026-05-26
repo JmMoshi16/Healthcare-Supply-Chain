@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= esc($title ?? 'Healthcare Supply Chain') ?></title>
+    <meta name="csrf-token" content="<?= csrf_token() ?>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/premium.css">
@@ -26,6 +27,7 @@ $isStock = str_contains($uri, 'stocks');
 $isReorder = str_contains($uri, 'reorder');
 $isUsers = str_contains($uri, 'users');
 $isActivityLogs = str_contains($uri, 'activity-logs');
+$isEmail = str_contains($uri, 'emails');
 ?>
 
 <!-- ═══════════════════════════════════════
@@ -51,6 +53,7 @@ $isActivityLogs = str_contains($uri, 'activity-logs');
             <div class="sb-rail-sep"></div>
             <button class="sb-rail-icon <?= $isUsers ? 'active' : '' ?>" onclick="location.href='/users'"           title="Users"><i class="bi bi-people"></i></button>
             <button class="sb-rail-icon <?= $isActivityLogs ? 'active' : '' ?>" onclick="location.href='/activity-logs'" title="Activity Logs"><i class="bi bi-clock-history"></i></button>
+            <button class="sb-rail-icon <?= $isEmail ? 'active' : '' ?>" onclick="location.href='/emails'"          title="Email Management"><i class="bi bi-envelope"></i></button>
             <?php endif; ?>
         </div>
         <div class="sb-rail-bottom">
@@ -91,6 +94,7 @@ $isActivityLogs = str_contains($uri, 'activity-logs');
             <div class="sb-rail-sep" style="width:100%;margin:.4rem 0;"></div>
             <a href="/users" class="sb-item <?= $isUsers ? 'active' : '' ?>"><i class="bi bi-people<?= $isUsers ? '-fill' : '' ?>"></i><span>Users</span></a>
             <a href="/activity-logs" class="sb-item <?= $isActivityLogs ? 'active' : '' ?>"><i class="bi bi-clock-history"></i><span>Activity Logs</span></a>
+            <a href="/emails" class="sb-item <?= $isEmail ? 'active' : '' ?>"><i class="bi bi-envelope<?= $isEmail ? '-fill' : '' ?>"></i><span>Email Management</span></a>
             <?php endif; ?>
         </nav>
 
