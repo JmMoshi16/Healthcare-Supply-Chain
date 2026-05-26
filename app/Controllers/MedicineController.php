@@ -70,6 +70,9 @@ class MedicineController extends BaseController
         if ($request->hasFile('image')) {
             $data['image'] = upload_file($request->file('image'), 'uploads/medicines');
         }
+        
+        $data['minimum_stock'] = isset($data['minimum_stock']) ? (int)$data['minimum_stock'] : 10;
+        $data['reorder_quantity'] = isset($data['reorder_quantity']) ? (int)$data['reorder_quantity'] : 50;
 
         $this->medicine->create($data);
         flash('success', 'Medicine created successfully');
@@ -130,6 +133,8 @@ class MedicineController extends BaseController
         
         // Ensure is_active is set correctly (0 or 1)
         $data['is_active'] = isset($data['is_active']) ? (int)$data['is_active'] : 1;
+        $data['minimum_stock'] = isset($data['minimum_stock']) ? (int)$data['minimum_stock'] : 10;
+        $data['reorder_quantity'] = isset($data['reorder_quantity']) ? (int)$data['reorder_quantity'] : 50;
 
         $this->medicine->update((int) $id, $data);
         

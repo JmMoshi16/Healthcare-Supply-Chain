@@ -17,6 +17,7 @@ use App\Controllers\Api\MedicineApiController;
 use App\Controllers\NotificationController;
 use App\Controllers\CalendarController;
 use App\Controllers\ExpiryCalendarController;
+use App\Controllers\ReorderController;
 
 // Public routes
 $router->get('/', [AuthController::class, 'loginForm']);
@@ -33,6 +34,7 @@ $router->group(['middleware' => [AuthMiddleware::class, CsrfMiddleware::class]],
     $router->resource('medicines', MedicineController::class);
     $router->resource('batches', BatchController::class);
     $router->resource('stocks', StockController::class);
+    $router->get('/reorder', [ReorderController::class, 'index']);
 
     // User management (superadmin only)
     $router->get('/users', [UserController::class, 'index']);

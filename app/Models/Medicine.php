@@ -9,7 +9,7 @@ class Medicine extends BaseModel
     protected bool $logActivities = true;
 
     protected array $fillable = [
-        'name', 'generic_name', 'category', 'description', 'unit', 'image', 'is_active',
+        'name', 'generic_name', 'category', 'description', 'unit', 'image', 'is_active', 'minimum_stock', 'reorder_quantity'
     ];
 
     public function withBatches(int $id): ?array
@@ -30,18 +30,20 @@ class Medicine extends BaseModel
         return $medicine;
     }
 
-    public function getLowStock(int $threshold = 10): array
+    public function getLowStock(): array
     {
         $sql = "
-            SELECT m.*, COALESCE(SUM(b.current_quantity), 0) AS total_stock
+            SELECT m.*, COALESCE(SUM(b.current_quantity), 0) AS total_stock,
+                   (m.minimum_stock - COALESCE(SUM(b.current_quantity), 0)) as deficit,
+                   m.reorder_quantity as suggested_order
             FROM medicines m
             LEFT JOIN batches b ON b.medicine_id = m.id AND b.status = 'active' AND b.deleted_at IS NULL
             WHERE m.is_active = 1 AND m.deleted_at IS NULL
             GROUP BY m.id
-            HAVING total_stock < ?
-            ORDER BY total_stock ASC
+            HAVING total_stock <= m.minimum_stock
+            ORDER BY deficit DESC, total_stock ASC
         ";
 
-        return \App\Core\Database::query($sql, [$threshold])->fetchAll(\PDO::FETCH_ASSOC);
+        return \App\Core\Database::query($sql)->fetchAll(\PDO::FETCH_ASSOC);
     }
 }

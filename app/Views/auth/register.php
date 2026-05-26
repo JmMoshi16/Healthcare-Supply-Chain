@@ -352,8 +352,8 @@ html[data-nav='to-login']::view-transition-new(auth-form) {
                     <div class="auth-input-wrap">
                         <input type="password" name="password" id="regPwd" class="auth-input"
                                placeholder="Min. 8 chars" required oninput="checkStrength(this.value)">
-                        <button type="button" class="auth-input-btn" onclick="togglePwd('regPwd','regPwdEye')">
-                            <i class="bi bi-eye" id="regPwdEye"></i>
+                        <button type="button" class="auth-input-btn" onclick="togglePasswords()" title="Toggle Password Visibility">
+                            <i class="bi bi-eye" id="pwdEyeIcon"></i>
                         </button>
                     </div>
                     <div class="auth-pwd-strength">
@@ -367,10 +367,7 @@ html[data-nav='to-login']::view-transition-new(auth-form) {
                     <label class="auth-label">Confirm Password</label>
                     <div class="auth-input-wrap">
                         <input type="password" name="password_confirm" id="regPwd2" class="auth-input"
-                               placeholder="Repeat" required oninput="checkMatch()">
-                        <button type="button" class="auth-input-btn" onclick="togglePwd('regPwd2','regPwd2Eye')">
-                            <i class="bi bi-eye" id="regPwd2Eye"></i>
-                        </button>
+                               placeholder="Repeat" required oninput="checkMatch()" style="padding-right: 0.95rem;">
                     </div>
                     <div class="auth-hint" id="matchHint" style="display:none;"></div>
                 </div>
@@ -455,11 +452,14 @@ function selectRole(e, role) {
     if (checked) selectRole(new Event('click'), checked.value);
 })();
 
-function togglePwd(inputId, iconId) {
-    const inp = document.getElementById(inputId);
-    const ico = document.getElementById(iconId);
-    inp.type = inp.type === 'password' ? 'text' : 'password';
-    ico.className = inp.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+function togglePasswords() {
+    const p1 = document.getElementById('regPwd');
+    const p2 = document.getElementById('regPwd2');
+    const ico = document.getElementById('pwdEyeIcon');
+    const newType = p1.type === 'password' ? 'text' : 'password';
+    p1.type = newType;
+    p2.type = newType;
+    ico.className = newType === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
 }
 
 function checkStrength(val) {

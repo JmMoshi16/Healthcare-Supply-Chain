@@ -366,7 +366,7 @@ $divBatch      = $totalBatch > 0 ? $totalBatch : 1;
         <div class="hcd-panel hcd-panel-animated">
             <div class="hcd-panel-hdr">
                 <span class="hcd-panel-title">Low Stock Alert</span>
-                <a href="#" class="hcd-panel-link" onclick="showLowStockModal();return false;">View All <i class="bi bi-arrow-right"></i></a>
+                <a href="/reorder" class="hcd-panel-link">Reorder List <i class="bi bi-arrow-right"></i></a>
             </div>
             <div class="hcd-alert-list" id="lowStockAlertList">
                 <?php if(empty($lowStockItems)): ?>
@@ -382,7 +382,7 @@ $divBatch      = $totalBatch > 0 ? $totalBatch : 1;
                     <div style="flex:1;min-width:0;">
                         <div class="hcd-alert-name"><?= esc($item['name']) ?></div>
                         <div class="hcd-alert-sub"><i class="bi bi-tag"></i><?= esc($item['category']) ?></div>
-                        <div class="hcd-alert-time"><i class="bi bi-archive"></i><span class="hcd-stock-status"><?= $st==0?'Out of stock':$st.' units left' ?></span></div>
+                        <div class="hcd-alert-time"><i class="bi bi-archive"></i><span class="hcd-stock-status"><?= $st==0?'Out of stock':$st.' / '.$item['minimum_stock'].' (Min)' ?></span></div>
                     </div>
                     <?php if(can('batches.*')): ?>
                     <a href="/batches/create" class="hcd-tbl-btn" title="Add Batch" style="flex-shrink:0;"><i class="bi bi-plus"></i></a>

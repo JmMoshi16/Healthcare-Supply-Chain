@@ -67,6 +67,21 @@
                     <div class="pf-row">
                         <div class="pf-col-6">
                             <div class="form-group">
+                                <label class="form-label">Minimum Stock Level</label>
+                                <input type="number" name="minimum_stock" class="form-input" placeholder="e.g. 10" value="<?= esc(old('minimum_stock', '10')) ?>" min="0">
+                            </div>
+                        </div>
+                        <div class="pf-col-6">
+                            <div class="form-group">
+                                <label class="form-label">Suggested Reorder Quantity</label>
+                                <input type="number" name="reorder_quantity" class="form-input" placeholder="e.g. 50" value="<?= esc(old('reorder_quantity', '50')) ?>" min="1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pf-row">
+                        <div class="pf-col-6">
+                            <div class="form-group">
                                 <label class="form-label">Product Image</label>
                                 <div class="pf-upload-zone" id="uploadZone" onclick="document.getElementById('imageInput').click()">
                                     <div class="pf-upload-inner" id="uploadInner">

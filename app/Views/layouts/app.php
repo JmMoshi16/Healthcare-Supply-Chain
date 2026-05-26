@@ -23,6 +23,7 @@ $isDash  = str_contains($uri, 'dashboard');
 $isMed   = str_contains($uri, 'medicines');
 $isBatch = str_contains($uri, 'batches');
 $isStock = str_contains($uri, 'stocks');
+$isReorder = str_contains($uri, 'reorder');
 $isUsers = str_contains($uri, 'users');
 $isActivityLogs = str_contains($uri, 'activity-logs');
 ?>
@@ -45,6 +46,7 @@ $isActivityLogs = str_contains($uri, 'activity-logs');
             <button class="sb-rail-icon <?= $isMed   ? 'active' : '' ?>" onclick="location.href='/medicines'"       title="Medicines"><i class="bi bi-capsule"></i></button>
             <button class="sb-rail-icon <?= $isBatch ? 'active' : '' ?>" onclick="location.href='/batches'"         title="Batches"><i class="bi bi-box-seam"></i></button>
             <button class="sb-rail-icon <?= $isStock ? 'active' : '' ?>" onclick="location.href='/stocks'"          title="Stock Transactions"><i class="bi bi-arrow-left-right"></i></button>
+            <button class="sb-rail-icon <?= $isReorder ? 'active' : '' ?>" onclick="location.href='/reorder'"       title="Reorder List"><i class="bi bi-cart"></i></button>
             <?php if (has_role('superadmin')): ?>
             <div class="sb-rail-sep"></div>
             <button class="sb-rail-icon <?= $isUsers ? 'active' : '' ?>" onclick="location.href='/users'"           title="Users"><i class="bi bi-people"></i></button>
@@ -84,6 +86,7 @@ $isActivityLogs = str_contains($uri, 'activity-logs');
             <a href="/medicines" class="sb-item <?= $isMed   ? 'active' : '' ?>"><i class="bi bi-capsule"></i><span>Medicines</span></a>
             <a href="/batches"   class="sb-item <?= $isBatch ? 'active' : '' ?>"><i class="bi bi-box-seam"></i><span>Batches</span></a>
             <a href="/stocks"    class="sb-item <?= $isStock ? 'active' : '' ?>"><i class="bi bi-arrow-left-right"></i><span>Stock Transactions</span></a>
+            <a href="/reorder"   class="sb-item <?= $isReorder ? 'active' : '' ?>"><i class="bi bi-cart"></i><span>Reorder List</span></a>
             <?php if (has_role('superadmin')): ?>
             <div class="sb-rail-sep" style="width:100%;margin:.4rem 0;"></div>
             <a href="/users" class="sb-item <?= $isUsers ? 'active' : '' ?>"><i class="bi bi-people<?= $isUsers ? '-fill' : '' ?>"></i><span>Users</span></a>

@@ -28,7 +28,7 @@ class DashboardController extends BaseController
         
         // Get expiring and low stock
         $expiringSoon = $batch->getExpiringSoon(30);
-        $lowStockItems = $medicine->getLowStock(10);
+        $lowStockItems = $medicine->getLowStock();
         
         // Get transaction statistics
         $recentTransactions = $stock->getRecentTransactions(10);

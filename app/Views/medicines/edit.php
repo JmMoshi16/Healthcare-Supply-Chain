@@ -67,6 +67,21 @@
                     <div class="pf-row">
                         <div class="pf-col-6">
                             <div class="form-group">
+                                <label class="form-label">Minimum Stock Level</label>
+                                <input type="number" name="minimum_stock" class="form-input" value="<?= esc($medicine['minimum_stock'] ?? '10') ?>" min="0">
+                            </div>
+                        </div>
+                        <div class="pf-col-6">
+                            <div class="form-group">
+                                <label class="form-label">Suggested Reorder Quantity</label>
+                                <input type="number" name="reorder_quantity" class="form-input" value="<?= esc($medicine['reorder_quantity'] ?? '50') ?>" min="1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pf-row">
+                        <div class="pf-col-6">
+                            <div class="form-group">
                                 <label class="form-label">Status <span style="color:var(--text-muted);font-weight:400;">(Active = Visible, Inactive = Hidden)</span></label>
                                 <select name="is_active" class="form-input" id="statusSelect" onchange="updateStatusPreview()">
                                     <option value="1" <?= $medicine['is_active'] ? 'selected' : '' ?>>✓ Active (Visible in listings)</option>

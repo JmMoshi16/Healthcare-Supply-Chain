@@ -61,6 +61,14 @@
                         <div class="pshow-meta-label">Batches</div>
                         <div class="pshow-meta-value"><?= count($medicine['batches'] ?? []) ?></div>
                     </div>
+                    <div class="pshow-meta-item">
+                        <div class="pshow-meta-label">Min Stock</div>
+                        <div class="pshow-meta-value"><?= esc($medicine['minimum_stock'] ?? '10') ?></div>
+                    </div>
+                    <div class="pshow-meta-item">
+                        <div class="pshow-meta-label">Reorder Qty</div>
+                        <div class="pshow-meta-value"><?= esc($medicine['reorder_quantity'] ?? '50') ?></div>
+                    </div>
                 </div>
 
                 <?php if (!empty($medicine['description'])): ?>
@@ -136,8 +144,8 @@
                             </td>
                             <td style="color:var(--text-muted);"><?= esc($b['supplier'] ?? '—') ?></td>
                             <td>
-                                <?php if ($b['current_quantity'] < 10): ?>
-                                    <span class="badge badge-danger"><i class="bi bi-exclamation-triangle" style="font-size:.65rem;"></i> <?= (int)$b['current_quantity'] ?> Low</span>
+                                <?php if ($b['current_quantity'] == 0): ?>
+                                    <span class="badge badge-danger"><i class="bi bi-x-circle" style="font-size:.65rem;"></i> Out</span>
                                 <?php else: ?>
                                     <span class="badge badge-success"><i class="bi bi-check" style="font-size:.7rem;"></i> <?= (int)$b['current_quantity'] ?></span>
                                 <?php endif; ?>
@@ -152,6 +160,9 @@
                 <span style="font-size:.8rem;color:var(--text-muted);">
                     Total stock: <strong style="color:var(--text-heading);"><?= number_format((int)$medicine['total_stock']) ?> units</strong>
                 </span>
+                <?php if ($medicine['total_stock'] <= ($medicine['minimum_stock'] ?? 10)): ?>
+                    <span class="badge badge-danger"><i class="bi bi-exclamation-triangle"></i> Low Stock Alert</span>
+                <?php endif; ?>
             </div>
             <?php endif; ?>
         </div>
