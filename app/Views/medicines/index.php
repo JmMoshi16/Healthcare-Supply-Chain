@@ -1,6 +1,9 @@
 <?php use App\Core\View; View::layout('app'); $title = 'Medicines'; ?>
 <?php
-$allCategories = array_unique(array_column($data ?? [], 'category'));
+// Changed to read from the joined table column 'category_name'
+$allCategories = array_unique(array_column($data ?? [], 'category_name'));
+// Remove any empty entries from legacy data records or unmatched joins
+$allCategories = array_filter($allCategories); 
 sort($allCategories);
 $totalCount = count($data ?? []);
 ?>
@@ -8,7 +11,6 @@ $totalCount = count($data ?? []);
 <link rel="stylesheet" href="/assets/css/medicines-advanced.css">
 <script src="/assets/js/medicines-advanced.js"></script>
 
-<!-- Page header -->
 <div class="pg-header">
     <div class="pg-header-left">
         <div class="pg-breadcrumb">
@@ -25,7 +27,6 @@ $totalCount = count($data ?? []);
 
 <div class="pg-layout">
 
-    <!-- LEFT FILTER SIDEBAR -->
     <aside class="pg-filters" id="pgFiltersSidebar">
         <div class="pf-section">
             <button class="pf-dropdown-toggle" onclick="togglePFSection('catBody','catToggle')">
@@ -39,7 +40,7 @@ $totalCount = count($data ?? []);
                 </label>
                 <?php foreach ($allCategories as $cat): ?>
                 <label class="pf-radio">
-                    <input type="radio" name="pf_category" value="<?= esc($cat) ?>" onchange="applyFilters()">
+                    <input type="radio" name="pf_category" value="<?= esc(strtolower($cat)) ?>" onchange="applyFilters()">
                     <span class="pf-radio-dot"></span> <?= esc(ucfirst($cat)) ?>
                 </label>
                 <?php endforeach; ?>
@@ -68,7 +69,6 @@ $totalCount = count($data ?? []);
         <button class="pf-apply-btn" onclick="applyFilters()">Apply</button>
     </aside>
 
-    <!-- RIGHT: search + grid -->
     <div class="pg-right">
         <div class="pg-toolbar">
             <div class="pg-search-wrap" id="pgSearchWrap">
@@ -95,7 +95,7 @@ $totalCount = count($data ?? []);
             <div class="pgc"
                  data-medicine-id="<?= (int)$m['id'] ?>"
                  data-name="<?= strtolower(esc($m['name'])) ?>"
-                 data-cat="<?= strtolower(esc($m['category'])) ?>"
+                 data-cat="<?= strtolower(esc($m['category_name'] ?? 'Uncategorized')) ?>"
                  data-status="<?= $m['is_active'] ? 'active' : 'inactive' ?>">
 
                 <div class="pgc-img-wrap">
@@ -129,7 +129,7 @@ $totalCount = count($data ?? []);
                 </div>
 
                 <div class="pgc-body">
-                    <div class="pgc-category"><?= esc(ucfirst($m['category'])) ?></div>
+                    <div class="pgc-category"><?= esc(ucfirst($m['category_name'] ?? 'Uncategorized')) ?></div>
                     <div class="pgc-name" title="<?= esc($m['name']) ?>"><?= esc($m['name']) ?></div>
                     <div class="pgc-footer">
                         <span style="font-size:.78rem;color:var(--text-muted);"><?= esc($m['unit']) ?></span>
@@ -149,7 +149,7 @@ $totalCount = count($data ?? []);
             <i class="bi bi-search"></i><p>No medicines match your search.</p>
         </div>
 
-        <?php if ($pagination['total_pages'] > 1): ?>
+        <?php if (isset($pagination['total_pages']) && $pagination['total_pages'] > 1): ?>
         <div class="pager-wrap">
             <?php for ($i = 1; $i <= $pagination['total_pages']; $i++): ?>
             <a href="?page=<?= $i ?>" class="page-link <?= $i === $pagination['current_page'] ? 'active' : '' ?>"><?= $i ?></a>
@@ -160,7 +160,6 @@ $totalCount = count($data ?? []);
     </div>
 </div>
 
-<!-- DELETE MODAL -->
 <div class="pg-modal-overlay" id="deleteModal" style="display:none;">
     <div class="pg-modal">
         <div class="pg-modal-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
@@ -174,7 +173,6 @@ $totalCount = count($data ?? []);
 </div>
 
 <script>
-// Count medicines on page load
 window.addEventListener('DOMContentLoaded', function() {
     updateCounts();
 });
@@ -194,8 +192,6 @@ function updateCounts() {
     
     if(activeEl) activeEl.textContent = `(${activeCount})`;
     if(inactiveEl) inactiveEl.textContent = `(${inactiveCount})`;
-    
-    console.log('Medicine counts:', { active: activeCount, inactive: inactiveCount });
 }
 
 function toggleSidebar(){ document.getElementById('pgFiltersSidebar').classList.toggle('pg-sidebar-open'); }
@@ -231,7 +227,6 @@ function applyFilters(){
     
     document.getElementById('pgNoResults').style.display = visible === 0 ? 'flex' : 'none';
     
-    // Show filter feedback
     if(status) {
         showToast(`Showing ${visible} ${status} medicine${visible !== 1 ? 's' : ''}`, 'success');
     }
@@ -246,7 +241,6 @@ document.getElementById('deleteConfirmBtn').addEventListener('click', () => { if
 function closeDeleteModal(){ document.getElementById('deleteModal').style.display = 'none'; pendingForm = null; }
 document.getElementById('deleteModal').addEventListener('click', e => { if(e.target === e.currentTarget) closeDeleteModal(); });
 
-// Toggle medicine status
 function toggleStatus(id, currentStatus) {
     const action = currentStatus ? 'deactivate' : 'activate';
     if(!confirm(`Are you sure you want to ${action} this medicine?`)) return;
@@ -261,22 +255,17 @@ function toggleStatus(id, currentStatus) {
     .then(res => res.json())
     .then(data => {
         if(data.success) {
-            // Update the card without full reload
             const card = document.querySelector(`[data-medicine-id="${id}"]`);
             if(card) {
                 const badge = card.querySelector('.pgc-status-badge');
                 const btn = card.querySelector('.status-toggle-btn');
                 const newStatus = data.is_active;
                 
-                // Update badge
                 badge.className = `pgc-status-badge ${newStatus ? 'pgc-badge-active' : 'pgc-badge-inactive'}`;
                 btn.textContent = newStatus ? 'Active' : 'Inactive';
                 btn.onclick = () => toggleStatus(id, newStatus);
                 
-                // Update data attribute
                 card.dataset.status = newStatus ? 'active' : 'inactive';
-                
-                // Show success message
                 showToast(`Medicine ${newStatus ? 'activated' : 'deactivated'} successfully`, 'success');
             }
         } else {
@@ -289,7 +278,6 @@ function toggleStatus(id, currentStatus) {
     });
 }
 
-// Toast notification
 function showToast(message, type = 'success') {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;

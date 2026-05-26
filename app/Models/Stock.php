@@ -106,7 +106,7 @@ class Stock extends BaseModel
             FROM stocks s
             JOIN batches b ON b.id = s.batch_id
             JOIN medicines m ON m.id = b.medicine_id
-            JOIN users u ON u.id = s.performed_by
+            LEFT JOIN users u ON u.id = s.performed_by
             ORDER BY s.created_at DESC
             LIMIT ?
         ";

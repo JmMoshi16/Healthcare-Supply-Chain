@@ -5,16 +5,37 @@ namespace App\Models;
 class Medicine extends BaseModel
 {
     protected string $table = 'medicines';
-    protected bool $useSoftDeletes = true;
-    protected bool $logActivities = true;
 
+    // Swap 'category' with 'category_id'
     protected array $fillable = [
-        'name', 'generic_name', 'category_id', 'description', 'unit', 'image', 'is_active', 'minimum_stock', 'reorder_quantity'
+        'name', 'generic_name', 'category_id', 'description', 'unit', 'image', 'is_active',
     ];
+
+    /**
+     * Fetch all medicines along with their related category names
+     */
+    public function getAllWithCategory(): array
+    {
+        $sql = "
+            SELECT m.*, c.name AS category_name
+            FROM medicines m
+            LEFT JOIN categories c ON m.category_id = c.id
+            ORDER BY m.name ASC
+        ";
+        return \App\Core\Database::query($sql)->fetchAll(\PDO::FETCH_ASSOC);
+    }
 
     public function withBatches(int $id): ?array
     {
-        $medicine = $this->find($id);
+        // Join with categories to ensure the detailed view has the category name string
+        $sql = "
+            SELECT m.*, c.name AS category_name 
+            FROM medicines m 
+            LEFT JOIN categories c ON m.category_id = c.id 
+            WHERE m.id = ?
+        ";
+        $medicine = \App\Core\Database::query($sql, [$id])->fetch(\PDO::FETCH_ASSOC);
+        
         if (!$medicine) {
             return null;
         }
@@ -30,33 +51,21 @@ class Medicine extends BaseModel
         return $medicine;
     }
 
-    public function getLowStock(): array
+    public function getLowStock(int $threshold = 10): array
     {
+        // Added c.name AS category_name and the LEFT JOIN to categories
         $sql = "
-            SELECT m.*, COALESCE(SUM(b.current_quantity), 0) AS total_stock,
-                   (m.minimum_stock - COALESCE(SUM(b.current_quantity), 0)) as deficit,
-                   m.reorder_quantity as suggested_order
+            SELECT m.*, c.name AS category, c.name AS category_name,
+                   COALESCE(SUM(b.current_quantity), 0) AS total_stock
             FROM medicines m
-            LEFT JOIN batches b ON b.medicine_id = m.id AND b.status = 'active' AND b.deleted_at IS NULL
-            WHERE m.is_active = 1 AND m.deleted_at IS NULL
-            GROUP BY m.id
-            HAVING total_stock <= m.minimum_stock
-            ORDER BY deficit DESC, total_stock ASC
+            LEFT JOIN categories c ON m.category_id = c.id
+            LEFT JOIN batches b ON b.medicine_id = m.id AND b.status = 'active'
+            WHERE m.is_active = 1
+            GROUP BY m.id, c.name
+            HAVING total_stock < ?
+            ORDER BY total_stock ASC
         ";
 
-        return \App\Core\Database::query($sql)->fetchAll(\PDO::FETCH_ASSOC);
-    }
-
-    public function getMedicineStats(): array
-    {
-        $sql = "
-            SELECT 
-                COUNT(*) as total,
-                SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active,
-                SUM(CASE WHEN is_active = 0 THEN 1 ELSE 0 END) as inactive
-            FROM medicines
-        ";
-
-        return \App\Core\Database::query($sql)->fetch(\PDO::FETCH_ASSOC) ?: [];
+        return \App\Core\Database::query($sql, [$threshold])->fetchAll(\PDO::FETCH_ASSOC);
     }
 }

@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= esc($title ?? 'Healthcare Supply Chain') ?></title>
-    <meta name="csrf-token" content="<?= csrf_token() ?>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/premium.css">
@@ -24,10 +23,8 @@ $isDash  = str_contains($uri, 'dashboard');
 $isMed   = str_contains($uri, 'medicines');
 $isBatch = str_contains($uri, 'batches');
 $isStock = str_contains($uri, 'stocks');
-$isReorder = str_contains($uri, 'reorder');
 $isUsers = str_contains($uri, 'users');
-$isActivityLogs = str_contains($uri, 'activity-logs');
-$isEmail = str_contains($uri, 'emails');
+$isCat   = str_contains($uri, 'categories');
 ?>
 
 <!-- ═══════════════════════════════════════
@@ -46,14 +43,12 @@ $isEmail = str_contains($uri, 'emails');
             </div>
             <button class="sb-rail-icon <?= $isDash  ? 'active' : '' ?>" onclick="location.href='/dashboard'"       title="Dashboard"><i class="bi bi-grid-fill"></i></button>
             <button class="sb-rail-icon <?= $isMed   ? 'active' : '' ?>" onclick="location.href='/medicines'"       title="Medicines"><i class="bi bi-capsule"></i></button>
+            <button class="sb-rail-icon <?= $isCat   ? 'active' : '' ?>" onclick="location.href='/categories'"      title="Categories"><i class="bi bi-tags"></i></button>
             <button class="sb-rail-icon <?= $isBatch ? 'active' : '' ?>" onclick="location.href='/batches'"         title="Batches"><i class="bi bi-box-seam"></i></button>
             <button class="sb-rail-icon <?= $isStock ? 'active' : '' ?>" onclick="location.href='/stocks'"          title="Stock Transactions"><i class="bi bi-arrow-left-right"></i></button>
-            <button class="sb-rail-icon <?= $isReorder ? 'active' : '' ?>" onclick="location.href='/reorder'"       title="Reorder List"><i class="bi bi-cart"></i></button>
             <?php if (has_role('superadmin')): ?>
             <div class="sb-rail-sep"></div>
             <button class="sb-rail-icon <?= $isUsers ? 'active' : '' ?>" onclick="location.href='/users'"           title="Users"><i class="bi bi-people"></i></button>
-            <button class="sb-rail-icon <?= $isActivityLogs ? 'active' : '' ?>" onclick="location.href='/activity-logs'" title="Activity Logs"><i class="bi bi-clock-history"></i></button>
-            <button class="sb-rail-icon <?= $isEmail ? 'active' : '' ?>" onclick="location.href='/emails'"          title="Email Management"><i class="bi bi-envelope"></i></button>
             <?php endif; ?>
         </div>
         <div class="sb-rail-bottom">
@@ -87,14 +82,12 @@ $isEmail = str_contains($uri, 'emails');
         <nav class="sb-nav">
             <a href="/dashboard" class="sb-item <?= $isDash  ? 'active' : '' ?>"><i class="bi bi-grid<?= $isDash ? '-fill' : '' ?>"></i><span>Dashboard</span></a>
             <a href="/medicines" class="sb-item <?= $isMed   ? 'active' : '' ?>"><i class="bi bi-capsule"></i><span>Medicines</span></a>
+            <a href="/categories" class="sb-item <?= $isCat   ? 'active' : '' ?>"><i class="bi bi-tags"></i><span>Categories</span></a>
             <a href="/batches"   class="sb-item <?= $isBatch ? 'active' : '' ?>"><i class="bi bi-box-seam"></i><span>Batches</span></a>
             <a href="/stocks"    class="sb-item <?= $isStock ? 'active' : '' ?>"><i class="bi bi-arrow-left-right"></i><span>Stock Transactions</span></a>
-            <a href="/reorder"   class="sb-item <?= $isReorder ? 'active' : '' ?>"><i class="bi bi-cart"></i><span>Reorder List</span></a>
             <?php if (has_role('superadmin')): ?>
             <div class="sb-rail-sep" style="width:100%;margin:.4rem 0;"></div>
             <a href="/users" class="sb-item <?= $isUsers ? 'active' : '' ?>"><i class="bi bi-people<?= $isUsers ? '-fill' : '' ?>"></i><span>Users</span></a>
-            <a href="/activity-logs" class="sb-item <?= $isActivityLogs ? 'active' : '' ?>"><i class="bi bi-clock-history"></i><span>Activity Logs</span></a>
-            <a href="/emails" class="sb-item <?= $isEmail ? 'active' : '' ?>"><i class="bi bi-envelope<?= $isEmail ? '-fill' : '' ?>"></i><span>Email Management</span></a>
             <?php endif; ?>
         </nav>
 
@@ -130,10 +123,16 @@ $isEmail = str_contains($uri, 'emails');
         </div>
 
         <div class="topbar-center">
-            <div class="topbar-search-wrap" id="globalSearch">
-                <i class="bi bi-search topbar-search-icon"></i>
-                <input type="text" class="topbar-search-input" placeholder="Search medicines, batches..." id="globalSearchInput" autocomplete="off">
-                <kbd class="topbar-search-kbd">⌘K</kbd>
+            <div class="topbar-search-wrap" id="globalSearch" style="position:relative;">
+                <input type="text" class="topbar-search-input" placeholder="Search medicines, batches..." id="globalSearchInput" autocomplete="off" style="padding-left:1rem;">
+                <!-- Search Dropdown -->
+                <div id="searchResultsPanel" style="display:none;position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);width:540px;max-width:80vw;background:var(--bg-card);border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.14);z-index:600;overflow:hidden;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.25rem;border-bottom:1px solid var(--border);">
+                        <span style="font-weight:600;font-size:.875rem;color:var(--text-heading);">Search Results</span>
+                        <button onclick="closeSearchResults()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1rem;"><i class="bi bi-x"></i></button>
+                    </div>
+                    <div id="searchResultsBody" style="max-height:380px;overflow-y:auto;"></div>
+                </div>
             </div>
         </div>
 
@@ -179,16 +178,6 @@ $isEmail = str_contains($uri, 'emails');
         </div>
     </header>
 
-    <!-- Search Results -->
-    <div class="search-results-overlay" id="searchResultsOverlay" style="display:none;">
-        <div class="search-results-panel" id="searchResultsPanel" style="position:absolute;top:70px;left:50%;transform:translateX(-50%);width:540px;max-width:90vw;background:var(--bg-card);border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.14);z-index:500;overflow:hidden;">
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.25rem;border-bottom:1px solid var(--border);">
-                <span style="font-weight:600;font-size:.875rem;color:var(--text-heading);">Search Results</span>
-                <button onclick="closeSearchResults()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:1rem;"><i class="bi bi-x"></i></button>
-            </div>
-            <div id="searchResultsBody" style="max-height:380px;overflow-y:auto;"></div>
-        </div>
-    </div>
 
     <!-- Notification Panel -->
     <div class="notif-overlay" id="notifOverlay" onclick="closeNotifications()"></div>
@@ -690,12 +679,16 @@ document.addEventListener('click',function(e){
 let _st;
 const _si=document.getElementById('globalSearchInput');
 if(_si){
-    document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();_si.focus();} if(e.key==='Escape')closeSearchResults(); });
+    document.addEventListener('keydown',e=>{ if(e.key==='Escape')closeSearchResults(); });
+    document.addEventListener('click',e=>{ if(!document.getElementById('globalSearch').contains(e.target)) closeSearchResults(); });
+    _si.addEventListener('keydown',e=>{
+        if(e.key==='Enter'){ e.preventDefault(); const q=_si.value.trim(); clearTimeout(_st); if(q.length>=2) performSearch(q); else closeSearchResults(); }
+    });
     _si.addEventListener('input',e=>{ const q=e.target.value.trim(); clearTimeout(_st); if(q.length>=2) _st=setTimeout(()=>performSearch(q),300); else closeSearchResults(); });
-    _si.addEventListener('focus',()=>{ if(_si.value.trim().length>=2) document.getElementById('searchResultsOverlay').style.display='block'; });
+    _si.addEventListener('focus',()=>{ if(_si.value.trim().length>=2) document.getElementById('searchResultsPanel').style.display='block'; });
 }
 function performSearch(q){
-    document.getElementById('searchResultsOverlay').style.display='block';
+    document.getElementById('searchResultsPanel').style.display='block';
     document.getElementById('searchResultsBody').innerHTML='<div style="text-align:center;padding:2rem;color:#94a3b8;"><p>Searching...</p></div>';
     fetch(`/api/search?q=${encodeURIComponent(q)}`).then(r=>r.json()).then(displaySearchResults).catch(()=>{
         document.getElementById('searchResultsBody').innerHTML='<div style="text-align:center;padding:2rem;color:#94a3b8;"><p>Search failed.</p></div>';
@@ -709,7 +702,7 @@ function displaySearchResults(data){
     let h='';
     if(data.medicines?.length){
         h+='<div style="padding:.5rem 0;"><div style="padding:.5rem 1.25rem;font-size:.72rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;"><i class="bi bi-capsule"></i> Medicines</div>';
-        data.medicines.forEach(i=>{ h+=`<a href="/medicines/${i.id}" style="display:flex;align-items:center;gap:.85rem;padding:.7rem 1.25rem;text-decoration:none;transition:background .15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'"><div style="width:34px;height:34px;background:#eef3ff;color:#3d52d5;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;"><i class="bi bi-capsule"></i></div><div><div style="font-size:.85rem;font-weight:500;color:var(--text-heading);">${i.name}</div><div style="font-size:.75rem;color:#94a3b8;">${i.category} · ${i.unit}</div></div><i class="bi bi-arrow-right" style="color:#94a3b8;margin-left:auto;"></i></a>`; });
+        data.medicines.forEach(i=>{ h+=`<a href="/medicines/${i.id}" style="display:flex;align-items:center;gap:.85rem;padding:.7rem 1.25rem;text-decoration:none;transition:background .15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='none'"><div style="width:34px;height:34px;background:#eef3ff;color:#3d52d5;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;"><i class="bi bi-capsule"></i></div><div><div style="font-size:.85rem;font-weight:500;color:var(--text-heading);">${i.name}</div><div style="font-size:.75rem;color:#94a3b8;">${i.category??''} · ${i.unit??''}</div></div><i class="bi bi-arrow-right" style="color:#94a3b8;margin-left:auto;"></i></a>`; });
         h+='</div>';
     }
     if(data.batches?.length){
@@ -719,7 +712,7 @@ function displaySearchResults(data){
     }
     document.getElementById('searchResultsBody').innerHTML=h;
 }
-function closeSearchResults(){ document.getElementById('searchResultsOverlay').style.display='none'; }
+function closeSearchResults(){ document.getElementById('searchResultsPanel').style.display='none'; }
 
 /* Notifications */
 function toggleNotifications(){

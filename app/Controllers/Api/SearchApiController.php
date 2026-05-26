@@ -67,19 +67,19 @@ class SearchApiController extends BaseController
     
     private function searchMedicines(string $query): array
     {
-        // Use parameterized query to prevent SQL injection
         $sql = "
-            SELECT id, name, generic_name, category, unit
-            FROM medicines
-            WHERE is_active = 1
+            SELECT m.id, m.name, m.generic_name, c.name AS category, m.unit
+            FROM medicines m
+            LEFT JOIN categories c ON c.id = m.category_id
+            WHERE m.is_active = 1
               AND (
-                  name LIKE ? 
-                  OR generic_name LIKE ?
-                  OR category LIKE ?
+                  m.name LIKE ?
+                  OR m.generic_name LIKE ?
+                  OR c.name LIKE ?
               )
             LIMIT 5
         ";
-        
+
         $searchTerm = "%{$query}%";
         return \App\Core\Database::query($sql, [$searchTerm, $searchTerm, $searchTerm])
             ->fetchAll(\PDO::FETCH_ASSOC);

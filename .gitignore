@@ -10,3 +10,4 @@
 !public/uploads/medicines/.gitkeep
 composer.lock
 coverage/
+/medicine/

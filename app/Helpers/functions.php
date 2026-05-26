@@ -98,8 +98,8 @@ function can(string $permission): bool
     
     $permissions = [
         'superadmin' => ['*'],
-        'manager' => ['medicines.*', 'batches.*', 'stocks.*'],
-        'staff' => ['medicines.view', 'batches.view', 'stocks.view']
+        'manager' => ['medicines.*', 'batches.*', 'stocks.*', 'categories.*'],
+        'staff' => ['medicines.view', 'batches.view', 'stocks.view', 'categories.view']
     ];
     
     $userPermissions = $permissions[$user['role']] ?? [];

@@ -21,7 +21,7 @@ class MedicineTest extends TestCase
         $fillable = $prop->getValue(new Medicine());
 
         $this->assertContains('name', $fillable);
-        $this->assertContains('category', $fillable);
+        $this->assertContains('category_id', $fillable);
         $this->assertContains('unit', $fillable);
     }
 
