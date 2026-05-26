@@ -29,7 +29,7 @@ function view(string $view, array $data = []): string
 }
 
 // Session helpers
-function session(string $key = null, $default = null)
+function session(?string $key = null, $default = null)
 {
     if ($key === null) {
         return $_SESSION;

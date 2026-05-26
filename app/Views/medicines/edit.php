@@ -59,7 +59,12 @@
                         <div class="pf-col-6">
                             <div class="form-group">
                                 <label class="form-label">Category <span class="pf-required">*</span></label>
-                                <input type="text" name="category" class="form-input" value="<?= esc($medicine['category']) ?>" required>
+                                <select name="category_id" class="form-input" required>
+                                    <option value="">Select category</option>
+                                    <?php foreach ($categories as $cat): ?>
+                                    <option value="<?= $cat['id'] ?>" <?= $medicine['category_id'] == $cat['id'] ? 'selected' : '' ?>><?= esc($cat['name']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
                         </div>
                     </div>

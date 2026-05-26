@@ -90,7 +90,7 @@ class Router
                 array_shift($matches);
                 
                 foreach ($route['middleware'] as $middleware) {
-                    $middlewareInstance = new $middleware();
+                    $middlewareInstance = is_object($middleware) ? $middleware : new $middleware();
                     $middlewareResponse = $middlewareInstance->handle($request);
                     
                     if ($middlewareResponse !== null) {

@@ -9,7 +9,7 @@ class Medicine extends BaseModel
     protected bool $logActivities = true;
 
     protected array $fillable = [
-        'name', 'generic_name', 'category', 'description', 'unit', 'image', 'is_active', 'minimum_stock', 'reorder_quantity'
+        'name', 'generic_name', 'category_id', 'description', 'unit', 'image', 'is_active', 'minimum_stock', 'reorder_quantity'
     ];
 
     public function withBatches(int $id): ?array
