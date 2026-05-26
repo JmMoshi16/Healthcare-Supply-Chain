@@ -30,44 +30,52 @@ $divBatch      = $totalBatch > 0 ? $totalBatch : 1;
 <!-- ═══ HERO ═══ -->
 <div class="hcd-hero">
     <div class="hcd-hero-left">
-        <div class="hcd-hero-greeting"><?= $greeting ?></div>
-        <h1 class="hcd-hero-name"><?= esc(explode(' ',$userName)[0]) ?></h1>
-        <div class="hcd-hero-role">
-            <i class="bi bi-shield-check"></i>
-            <span><?= esc(ucfirst($userRole)) ?></span>
-            <span class="hcd-hero-divider">•</span>
-            <span id="heroDateTime"><?= date('l, M j, Y') ?></span>
-        </div>
+        <div class="hcd-hero-welcome">Welcome back, <?= esc(explode(' ',$userName)[0]) ?>!</div>
+        <h1 class="hcd-hero-headline">Here's what's happening<br>in your supply chain today.</h1>
     </div>
+
     <div class="hcd-hero-stats">
         <div class="hcd-hero-stat" data-stat="medicines">
-            <div class="hcd-hero-stat-icon" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%);color:#fff;">
-                <i class="bi bi-capsule-pill"></i>
-            </div>
-            <div class="hcd-hero-stat-content">
+            <div class="hcd-hero-stat-top">
                 <div class="hcd-hero-stat-value" data-target="<?= $activeMeds ?>">0</div>
-                <div class="hcd-hero-stat-label">Active Medicines</div>
+                <div class="hcd-hero-stat-icon-sm" style="background:rgba(255,255,255,0.15);">
+                    <i class="bi bi-capsule-pill"></i>
+                </div>
             </div>
+            <div class="hcd-hero-stat-label">Active Medicines</div>
+            <div class="hcd-hero-stat-trend up"><i class="bi bi-arrow-up"></i> <?= $activeMeds > 0 ? round(($activeMeds/$divMeds)*100) : 0 ?>% of total</div>
         </div>
+        <div class="hcd-hero-stat-divider"></div>
         <div class="hcd-hero-stat" data-stat="expiring">
-            <div class="hcd-hero-stat-icon" style="background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%);color:#fff;">
-                <i class="bi bi-hourglass-split"></i>
-            </div>
-            <div class="hcd-hero-stat-content">
+            <div class="hcd-hero-stat-top">
                 <div class="hcd-hero-stat-value" data-target="<?= $expiringCount ?>">0</div>
-                <div class="hcd-hero-stat-label">Expiring Soon</div>
+                <div class="hcd-hero-stat-icon-sm" style="background:rgba(255,255,255,0.15);">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+            </div>
+            <div class="hcd-hero-stat-label">Expiring Soon</div>
+            <div class="hcd-hero-stat-trend <?= $expiringCount > 0 ? 'warn' : 'up' ?>">
+                <i class="bi bi-<?= $expiringCount > 0 ? 'exclamation-triangle' : 'check-circle' ?>"></i>
+                <?= $expiringCount > 0 ? 'Within 30 days' : 'All clear' ?>
             </div>
         </div>
+        <div class="hcd-hero-stat-divider"></div>
         <div class="hcd-hero-stat" data-stat="lowstock">
-            <div class="hcd-hero-stat-icon" style="background:linear-gradient(135deg, #ef4444 0%, #dc2626 100%);color:#fff;">
-                <i class="bi bi-exclamation-octagon"></i>
-            </div>
-            <div class="hcd-hero-stat-content">
+            <div class="hcd-hero-stat-top">
                 <div class="hcd-hero-stat-value" data-target="<?= $lowStockCount ?>">0</div>
-                <div class="hcd-hero-stat-label">Low Stock</div>
+                <div class="hcd-hero-stat-icon-sm" style="background:rgba(255,255,255,0.15);">
+                    <i class="bi bi-exclamation-octagon"></i>
+                </div>
+            </div>
+            <div class="hcd-hero-stat-label">Low Stock</div>
+            <div class="hcd-hero-stat-trend <?= $lowStockCount > 0 ? 'warn' : 'up' ?>">
+                <i class="bi bi-<?= $lowStockCount > 0 ? 'arrow-down' : 'check-circle' ?>"></i>
+                <?= $lowStockCount > 0 ? 'Needs restock' : 'Sufficient' ?>
             </div>
         </div>
+
     </div>
+
     <div class="hcd-hero-actions">
         <?php if (can('medicines.*')): ?>
         <a href="/medicines/create" class="hcd-hero-btn hcd-hero-btn-primary">
@@ -80,9 +88,8 @@ $divBatch      = $totalBatch > 0 ? $totalBatch : 1;
             <span>Manage Batches</span>
         </a>
     </div>
+
     <div class="hcd-hero-particles">
-        <div class="hcd-hero-particle"></div>
-        <div class="hcd-hero-particle"></div>
         <div class="hcd-hero-particle"></div>
         <div class="hcd-hero-particle"></div>
         <div class="hcd-hero-particle"></div>
