@@ -7,7 +7,8 @@ class Stock extends BaseModel
     protected string $table = 'stocks';
 
     protected array $fillable = [
-        'batch_id', 'transaction_type', 'quantity', 'reason', 'performed_by',
+        'batch_id', 'transaction_type', 'reason_code', 'reference_number',
+        'quantity', 'reason', 'recipient', 'ward_department', 'performed_by',
     ];
 
     public function create(array $data): int
@@ -18,16 +19,90 @@ class Stock extends BaseModel
             $data['transaction_type']
         );
 
-        return parent::create($data);
+        $data = $this->filterFillable($data);
+        $data['created_at'] = now();
+
+        $cols        = implode(', ', array_keys($data));
+        $placeholders = implode(', ', array_fill(0, count($data), '?'));
+        $sql         = "INSERT INTO stocks ({$cols}) VALUES ({$placeholders})";
+
+        \App\Core\Database::query($sql, array_values($data));
+        return (int) \App\Core\Database::lastInsertId();
+    }
+
+    public function getFiltered(array $filters = [], string $sort = 'created_at', string $dir = 'DESC', int $perPage = 20, int $page = 1): array
+    {
+        $allowed_sorts = ['id', 'created_at', 'quantity', 'transaction_type', 'reason_code'];
+        $sort = in_array($sort, $allowed_sorts) ? $sort : 'created_at';
+        $dir  = strtoupper($dir) === 'ASC' ? 'ASC' : 'DESC';
+
+        $where  = ['1=1'];
+        $params = [];
+
+        if (!empty($filters['type'])) {
+            $where[]  = 's.transaction_type = ?';
+            $params[] = $filters['type'];
+        }
+        if (!empty($filters['reason_code'])) {
+            $where[]  = 's.reason_code = ?';
+            $params[] = $filters['reason_code'];
+        }
+        if (!empty($filters['ward'])) {
+            $where[]  = 's.ward_department LIKE ?';
+            $params[] = '%' . $filters['ward'] . '%';
+        }
+        if (!empty($filters['performed_by'])) {
+            $where[]  = 's.performed_by = ?';
+            $params[] = $filters['performed_by'];
+        }
+        if (!empty($filters['date_from'])) {
+            $where[]  = 'DATE(s.created_at) >= ?';
+            $params[] = $filters['date_from'];
+        }
+        if (!empty($filters['date_to'])) {
+            $where[]  = 'DATE(s.created_at) <= ?';
+            $params[] = $filters['date_to'];
+        }
+        if (!empty($filters['search'])) {
+            $where[]  = '(b.batch_number LIKE ? OR s.reason LIKE ? OR s.recipient LIKE ? OR s.reference_number LIKE ?)';
+            $term     = '%' . $filters['search'] . '%';
+            $params   = array_merge($params, [$term, $term, $term, $term]);
+        }
+
+        $whereStr = implode(' AND ', $where);
+        $offset   = ($page - 1) * $perPage;
+
+        $countSql = "SELECT COUNT(*) FROM stocks s JOIN batches b ON b.id = s.batch_id WHERE {$whereStr}";
+        $total    = (int) \App\Core\Database::query($countSql, $params)->fetchColumn();
+
+        $sql = "
+            SELECT s.*, b.batch_number, m.name AS medicine_name, u.fullname AS performed_by_name
+            FROM stocks s
+            JOIN batches b ON b.id = s.batch_id
+            JOIN medicines m ON m.id = b.medicine_id
+            JOIN users u ON u.id = s.performed_by
+            WHERE {$whereStr}
+            ORDER BY s.{$sort} {$dir}
+            LIMIT {$perPage} OFFSET {$offset}
+        ";
+
+        $data = \App\Core\Database::query($sql, $params)->fetchAll(\PDO::FETCH_ASSOC);
+
+        return [
+            'data'       => $data,
+            'pagination' => [
+                'total'        => $total,
+                'per_page'     => $perPage,
+                'current_page' => $page,
+                'total_pages'  => (int) ceil($total / $perPage),
+            ],
+        ];
     }
 
     public function getRecentTransactions(int $limit = 10): array
     {
         $sql = "
-            SELECT s.*,
-                   b.batch_number,
-                   m.name AS medicine_name,
-                   u.fullname AS performed_by_name
+            SELECT s.*, b.batch_number, m.name AS medicine_name, u.fullname AS performed_by_name
             FROM stocks s
             JOIN batches b ON b.id = s.batch_id
             JOIN medicines m ON m.id = b.medicine_id

@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\Request;
 use App\Core\Session;
 use App\Core\Validator;
+use App\Core\Database;
 use App\Models\Stock;
 use App\Models\Batch;
 
@@ -19,15 +20,29 @@ class StockController extends BaseController
 
     public function index(Request $request)
     {
-        $page   = (int) ($request->get('page', 1));
-        $result = $this->stock->paginate(20, $page);
+        $filters = [
+            'type'         => $request->get('type'),
+            'reason_code'  => $request->get('reason_code'),
+            'ward'         => $request->get('ward'),
+            'performed_by' => $request->get('performed_by'),
+            'date_from'    => $request->get('date_from'),
+            'date_to'      => $request->get('date_to'),
+            'search'       => $request->get('search'),
+        ];
 
-        return $this->view('stocks/index', $result);
+        $sort   = $request->get('sort', 'created_at');
+        $dir    = $request->get('dir', 'DESC');
+        $page   = (int) $request->get('page', 1);
+        $result = $this->stock->getFiltered($filters, $sort, $dir, 20, $page);
+
+        $users = (new \App\Models\User())->all();
+        return $this->view('stocks/index', array_merge($result, ['filters' => $filters, 'users' => $users]));
     }
 
     public function create(Request $request)
     {
-        $batches = (new Batch())->all();
+        $sql     = "SELECT b.*, m.name AS medicine_name FROM batches b JOIN medicines m ON m.id = b.medicine_id WHERE b.status = 'active' ORDER BY m.name, b.batch_number";
+        $batches = \App\Core\Database::query($sql)->fetchAll(\PDO::FETCH_ASSOC);
         return $this->view('stocks/create', ['batches' => $batches]);
     }
 
@@ -39,6 +54,7 @@ class StockController extends BaseController
         if (!$validator->validate([
             'batch_id'         => 'required',
             'transaction_type' => 'required',
+            'reason_code'      => 'required',
             'quantity'         => 'required',
         ])) {
             Session::flash('errors', $validator->errors());
