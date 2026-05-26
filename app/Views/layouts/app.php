@@ -24,6 +24,7 @@ $isMed   = str_contains($uri, 'medicines');
 $isBatch = str_contains($uri, 'batches');
 $isStock = str_contains($uri, 'stocks');
 $isUsers = str_contains($uri, 'users');
+$isCat   = str_contains($uri, 'categories');
 ?>
 
 <!-- ═══════════════════════════════════════
@@ -42,6 +43,7 @@ $isUsers = str_contains($uri, 'users');
             </div>
             <button class="sb-rail-icon <?= $isDash  ? 'active' : '' ?>" onclick="location.href='/dashboard'"       title="Dashboard"><i class="bi bi-grid-fill"></i></button>
             <button class="sb-rail-icon <?= $isMed   ? 'active' : '' ?>" onclick="location.href='/medicines'"       title="Medicines"><i class="bi bi-capsule"></i></button>
+            <button class="sb-rail-icon <?= $isCat   ? 'active' : '' ?>" onclick="location.href='/categories'"      title="Categories"><i class="bi bi-tags"></i></button>
             <button class="sb-rail-icon <?= $isBatch ? 'active' : '' ?>" onclick="location.href='/batches'"         title="Batches"><i class="bi bi-box-seam"></i></button>
             <button class="sb-rail-icon <?= $isStock ? 'active' : '' ?>" onclick="location.href='/stocks'"          title="Stock Transactions"><i class="bi bi-arrow-left-right"></i></button>
             <?php if (has_role('superadmin')): ?>
@@ -80,6 +82,7 @@ $isUsers = str_contains($uri, 'users');
         <nav class="sb-nav">
             <a href="/dashboard" class="sb-item <?= $isDash  ? 'active' : '' ?>"><i class="bi bi-grid<?= $isDash ? '-fill' : '' ?>"></i><span>Dashboard</span></a>
             <a href="/medicines" class="sb-item <?= $isMed   ? 'active' : '' ?>"><i class="bi bi-capsule"></i><span>Medicines</span></a>
+            <a href="/categories" class="sb-item <?= $isCat   ? 'active' : '' ?>"><i class="bi bi-tags"></i><span>Categories</span></a>
             <a href="/batches"   class="sb-item <?= $isBatch ? 'active' : '' ?>"><i class="bi bi-box-seam"></i><span>Batches</span></a>
             <a href="/stocks"    class="sb-item <?= $isStock ? 'active' : '' ?>"><i class="bi bi-arrow-left-right"></i><span>Stock Transactions</span></a>
             <?php if (has_role('superadmin')): ?>

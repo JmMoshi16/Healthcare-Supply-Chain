@@ -7,5 +7,7 @@
 			"path": "../ci4_crud_exam-main"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "Healthcare-Supply-Chain"
+	}
 }

@@ -6,7 +6,7 @@
     <div>
         <h1 class="page-title"><?= esc($medicine['name']) ?></h1>
         <p class="page-subtitle">
-            <span class="badge badge-neutral"><?= esc(ucfirst($medicine['category'])) ?></span>
+            <span class="badge badge-neutral"><?= esc(ucfirst($medicine['category_name'] ?? 'Uncategorized')) ?></span>
             &nbsp;·&nbsp; <?= esc($medicine['unit']) ?>
         </p>
     </div>
@@ -19,7 +19,6 @@
 
 <div class="pf-form-layout">
 
-    <!-- LEFT: Image + info -->
     <div style="flex:0 0 340px;min-width:0;">
         <div class="card">
             <?php if (!empty($medicine['image'])): ?>
@@ -55,7 +54,7 @@
                     </div>
                     <div class="pshow-meta-item">
                         <div class="pshow-meta-label">Category</div>
-                        <div class="pshow-meta-value"><?= esc(ucfirst($medicine['category'])) ?></div>
+                        <div class="pshow-meta-value"><?= esc(ucfirst($medicine['category_name'] ?? 'Uncategorized')) ?></div>
                     </div>
                     <div class="pshow-meta-item">
                         <div class="pshow-meta-label">Batches</div>
@@ -84,7 +83,6 @@
         </div>
     </div>
 
-    <!-- RIGHT: Batches table -->
     <div style="flex:1;min-width:0;">
         <div class="card">
             <div class="card-header">

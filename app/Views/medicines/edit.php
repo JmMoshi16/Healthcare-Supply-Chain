@@ -59,7 +59,16 @@
                         <div class="pf-col-6">
                             <div class="form-group">
                                 <label class="form-label">Category <span class="pf-required">*</span></label>
-                                <input type="text" name="category" class="form-input" value="<?= esc($medicine['category']) ?>" required>
+                                <select name="category_id" class="form-input" required>
+                                    <option value="">Select a category</option>
+                                    <?php if (isset($categories) && is_array($categories)): ?>
+                                        <?php foreach ($categories as $cat): ?>
+                                            <option value="<?= (int)$cat['id'] ?>" <?= old('category_id', $medicine['category_id']) == $cat['id'] ? 'selected' : '' ?>>
+                                                <?= esc($cat['name']) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -112,16 +121,14 @@
                     </div>
                 </form>
 
-<!-- Standalone delete form — completely outside the update form -->
-<form id="deleteMedForm" action="/medicines/<?= (int)$medicine['id'] ?>" method="POST" style="display:none;">
-    <?= csrf_field() ?>
-    <input type="hidden" name="_method" value="DELETE">
-</form>
+                <form id="deleteMedForm" action="/medicines/<?= (int)$medicine['id'] ?>" method="POST" style="display:none;">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="_method" value="DELETE">
+                </form>
             </div>
         </div>
     </div>
 
-    <!-- RIGHT: Batches panel -->
     <div class="pf-form-side">
         <div class="card">
             <div class="card-header">

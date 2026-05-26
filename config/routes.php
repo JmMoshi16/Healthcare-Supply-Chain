@@ -10,6 +10,7 @@ use App\Controllers\MedicineController;
 use App\Controllers\BatchController;
 use App\Controllers\StockController;
 use App\Controllers\UserController;
+use App\Controllers\CategoryController;
 use App\Controllers\Api\AuthApiController;
 use App\Controllers\Api\SearchApiController;
 use App\Controllers\Api\MedicineApiController;
@@ -32,6 +33,7 @@ $router->group(['middleware' => [AuthMiddleware::class, CsrfMiddleware::class]],
     $router->resource('medicines', MedicineController::class);
     $router->resource('batches', BatchController::class);
     $router->resource('stocks', StockController::class);
+    $router->resource('categories', CategoryController::class);
 
     // User management (superadmin only)
     $router->get('/users', [UserController::class, 'index']);

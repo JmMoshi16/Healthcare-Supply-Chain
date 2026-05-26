@@ -23,7 +23,7 @@ class Batch extends BaseModel
     public function getExpiringSoon(int $days = 30): array
     {
         $sql = "
-            SELECT b.*, m.name AS medicine_name, m.generic_name, m.category
+            SELECT b.*, m.name AS medicine_name, m.generic_name,
             FROM batches b
             JOIN medicines m ON m.id = b.medicine_id
             WHERE b.expiry_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL ? DAY)
@@ -41,7 +41,6 @@ class Batch extends BaseModel
             SELECT b.*, 
                    m.name AS medicine_name, 
                    m.generic_name,
-                   m.category,
                    m.id AS medicine_id,
                    DATEDIFF(b.expiry_date, CURDATE()) AS days_until_expiry
             FROM batches b
@@ -71,5 +70,15 @@ class Batch extends BaseModel
         }
 
         return $this->update($id, ['current_quantity' => $newQuantity]);
+    }
+
+    /**
+     * Automatically update active batches that are past their expiry date to 'expired'
+     */
+    public static function updateExpiredStatuses(): int
+    {
+        $sql = "UPDATE batches SET status = 'expired' WHERE expiry_date <= CURDATE() AND status = 'active'";
+        $stmt = \App\Core\Database::query($sql);
+        return $stmt->rowCount();
     }
 }

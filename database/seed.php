@@ -11,13 +11,23 @@ $pdo = new PDO(
     [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
 );
 
-$seeders = glob(__DIR__ . '/seeders/*.php');
-sort($seeders);
+$seeders = [
+    __DIR__ . '/seeders/UserSeeder.php',
+    __DIR__ . '/seeders/CategorySeeder.php',
+    __DIR__ . '/seeders/MedicineSeeder.php',
+    __DIR__ . '/seeders/BatchSeeder.php',
+    __DIR__ . '/seeders/StockSeeder.php',
+];
 
 foreach ($seeders as $file) {
-    $seeder = require $file;
-    $seeder($pdo);
-    echo "Seeded: " . basename($file) . PHP_EOL;
+    if (file_exists($file)) {
+        $seeder = require $file;
+        $seeder($pdo);
+        echo "Seeded: " . basename($file) . PHP_EOL;
+    } else {
+        echo "Warning: Seeder file not found: " . basename($file) . PHP_EOL;
+    }
 }
 
 echo "All seeders completed." . PHP_EOL;
+

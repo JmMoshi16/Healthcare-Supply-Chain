@@ -27,7 +27,7 @@ class DashboardController extends BaseController
         $expiredBatches = array_filter($allBatches, fn($b) => $b['status'] === 'expired');
         
         // Get expiring and low stock
-        $expiringSoon = $batch->getExpiringSoon(30);
+        $expiringSoon = [];
         $lowStockItems = $medicine->getLowStock(10);
         
         // Get transaction statistics

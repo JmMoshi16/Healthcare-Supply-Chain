@@ -18,20 +18,12 @@ class MedicineController extends BaseController
 
     public function index(Request $request)
     {
-        $page   = (int) ($request->get('page', 1));
-        
-        // Get all medicines including inactive ones
-        $offset = ($page - 1) * 20;
-        $medicines = $this->medicine->query()
-            ->orderBy('created_at', 'DESC')
-            ->limit(20, $offset)
-            ->get();
-        
-        $total = $this->medicine->query()->count();
+        // 1. Fetch medicines using our custom method that LEFT JOINs the categories table
+        $medicines = $this->medicine->getAllWithCategory();
         
         $result = [
             'data' => $medicines,
-            'pagination' => paginate($total, 20, $page)
+            'pagination' => paginate(count($medicines), 20, 1) // Using count of joined records
         ];
 
         return $this->view('medicines/index', $result);
@@ -44,7 +36,12 @@ class MedicineController extends BaseController
             return $this->redirect('/medicines');
         }
 
-        return $this->view('medicines/create');
+        // 2. Fetch all categories so your drop-down view can loop through them
+        $categories = \App\Core\Database::query("SELECT * FROM categories ORDER BY name ASC")->fetchAll(\PDO::FETCH_ASSOC);
+
+        return $this->view('medicines/create', [
+            'categories' => $categories
+        ]);
     }
 
     public function store(Request $request)
@@ -57,10 +54,11 @@ class MedicineController extends BaseController
         $data      = $request->all();
         $validator = new Validator($data);
 
+        // 3. Changed validation from 'category' to 'category_id'
         if (!$validator->validate([
-            'name'     => 'required|min:3|max:255',
-            'category' => 'required',
-            'unit'     => 'required',
+            'name'        => 'required|min:3|max:255',
+            'category_id' => 'required',
+            'unit'        => 'required',
         ])) {
             Session::flash('errors', $validator->errors());
             Session::flash('old_input', $data);
@@ -102,7 +100,13 @@ class MedicineController extends BaseController
             return $this->redirect('/medicines');
         }
 
-        return $this->view('medicines/edit', ['medicine' => $medicine]);
+        // 4. Fetch categories for the edit page drop-down too
+        $categories = \App\Core\Database::query("SELECT * FROM categories ORDER BY name ASC")->fetchAll(\PDO::FETCH_ASSOC);
+
+        return $this->view('medicines/edit', [
+            'medicine'   => $medicine,
+            'categories' => $categories
+        ]);
     }
 
     public function update(Request $request, string $id)
@@ -115,10 +119,11 @@ class MedicineController extends BaseController
         $data      = $request->all();
         $validator = new Validator($data);
 
+        // 5. Changed validation from 'category' to 'category_id'
         if (!$validator->validate([
-            'name'     => 'required|min:3|max:255',
-            'category' => 'required',
-            'unit'     => 'required',
+            'name'        => 'required|min:3|max:255',
+            'category_id' => 'required',
+            'unit'        => 'required',
         ])) {
             Session::flash('errors', $validator->errors());
             return $this->redirect("/medicines/{$id}/edit");
@@ -128,7 +133,6 @@ class MedicineController extends BaseController
             $data['image'] = upload_file($request->file('image'), 'uploads/medicines');
         }
         
-        // Ensure is_active is set correctly (0 or 1)
         $data['is_active'] = isset($data['is_active']) ? (int)$data['is_active'] : 1;
 
         $this->medicine->update((int) $id, $data);
