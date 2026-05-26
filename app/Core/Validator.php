@@ -87,6 +87,81 @@ class Validator
                     $this->errors[$field][] = ucfirst($field) . ' confirmation does not match';
                 }
                 break;
+                
+            case 'in':
+                $allowedValues = explode(',', $parameter);
+                if ($value && !in_array($value, $allowedValues, true)) {
+                    $this->errors[$field][] = ucfirst($field) . ' must be one of: ' . implode(', ', $allowedValues);
+                }
+                break;
+                
+            case 'integer':
+                if ($value !== null && $value !== '' && !filter_var($value, FILTER_VALIDATE_INT)) {
+                    $this->errors[$field][] = ucfirst($field) . ' must be an integer';
+                }
+                break;
+                
+            case 'positive':
+                if ($value !== null && $value !== '' && (!is_numeric($value) || $value <= 0)) {
+                    $this->errors[$field][] = ucfirst($field) . ' must be a positive number';
+                }
+                break;
+                
+            case 'alpha':
+                if ($value && !preg_match('/^[a-zA-Z]+$/', $value)) {
+                    $this->errors[$field][] = ucfirst($field) . ' must contain only letters';
+                }
+                break;
+                
+            case 'alpha_num':
+                if ($value && !preg_match('/^[a-zA-Z0-9]+$/', $value)) {
+                    $this->errors[$field][] = ucfirst($field) . ' must contain only letters and numbers';
+                }
+                break;
+                
+            case 'alpha_dash':
+                if ($value && !preg_match('/^[a-zA-Z0-9_-]+$/', $value)) {
+                    $this->errors[$field][] = ucfirst($field) . ' must contain only letters, numbers, dashes and underscores';
+                }
+                break;
+                
+            case 'url':
+                if ($value && !filter_var($value, FILTER_VALIDATE_URL)) {
+                    $this->errors[$field][] = ucfirst($field) . ' must be a valid URL';
+                }
+                break;
+                
+            case 'ip':
+                if ($value && !filter_var($value, FILTER_VALIDATE_IP)) {
+                    $this->errors[$field][] = ucfirst($field) . ' must be a valid IP address';
+                }
+                break;
+                
+            case 'regex':
+                if ($value && !preg_match($parameter, $value)) {
+                    $this->errors[$field][] = ucfirst($field) . ' format is invalid';
+                }
+                break;
+                
+            case 'between':
+                [$min, $max] = explode(',', $parameter);
+                $length = strlen($value);
+                if ($value && ($length < (int)$min || $length > (int)$max)) {
+                    $this->errors[$field][] = ucfirst($field) . " must be between {$min} and {$max} characters";
+                }
+                break;
+                
+            case 'array':
+                if ($value !== null && !is_array($value)) {
+                    $this->errors[$field][] = ucfirst($field) . ' must be an array';
+                }
+                break;
+                
+            case 'boolean':
+                if ($value !== null && !is_bool($value) && !in_array($value, [0, 1, '0', '1', true, false], true)) {
+                    $this->errors[$field][] = ucfirst($field) . ' must be a boolean';
+                }
+                break;
         }
     }
     
@@ -98,5 +173,31 @@ class Validator
     public function firstError(string $field): ?string
     {
         return $this->errors[$field][0] ?? null;
+    }
+    
+    public function hasErrors(): bool
+    {
+        return !empty($this->errors);
+    }
+    
+    public function getFirstErrorMessage(): string
+    {
+        if (empty($this->errors)) {
+            return '';
+        }
+        
+        $firstField = array_key_first($this->errors);
+        return $this->errors[$firstField][0] ?? '';
+    }
+    
+    public function getAllErrorMessages(): array
+    {
+        $messages = [];
+        foreach ($this->errors as $field => $fieldErrors) {
+            foreach ($fieldErrors as $error) {
+                $messages[] = $error;
+            }
+        }
+        return $messages;
     }
 }

@@ -145,4 +145,17 @@ class Stock extends BaseModel
 
         return \App\Core\Database::query($sql)->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    public function getTransactionStats(): array
+    {
+        $sql = "
+            SELECT 
+                COUNT(*) as total_count,
+                SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as today_count,
+                SUM(CASE WHEN created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 1 ELSE 0 END) as week_count
+            FROM stocks
+        ";
+
+        return \App\Core\Database::query($sql)->fetch(\PDO::FETCH_ASSOC) ?: [];
+    }
 }

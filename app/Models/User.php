@@ -83,4 +83,12 @@ class User extends BaseModel
 
         return parent::update($id, $data);
     }
+
+    public function getUserCount(): int
+    {
+        $result = \App\Core\Database::query("SELECT COUNT(*) as count FROM users")
+            ->fetch(\PDO::FETCH_ASSOC);
+        
+        return (int)($result['count'] ?? 0);
+    }
 }

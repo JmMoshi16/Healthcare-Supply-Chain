@@ -4,131 +4,212 @@ namespace App\Controllers\Api;
 
 use App\Controllers\BaseController;
 use App\Core\Request;
-use App\Core\Validator;
+use App\Core\ApiValidator;
+use App\Core\Logger;
 use App\Models\Medicine;
 use App\Models\Batch;
 
 class MedicineApiController extends BaseController
 {
+    use ApiValidator;
+    
     private Medicine $medicine;
     private Batch $batch;
 
     public function __construct()
     {
         $this->medicine = new Medicine();
-        $this->batch    = new Batch();
+        $this->batch = new Batch();
     }
 
     public function index(Request $request)
     {
-        $validator = new Validator($request->all());
-        if (!$validator->validate(['page' => 'numeric'])) {
-            return $this->json(['success' => false, 'errors' => $validator->errors()], 422);
+        // Validate query parameters
+        $page = $this->validateQueryParam($request, 'page', 'integer', 1, 1, 1000);
+        $perPage = $this->validateQueryParam($request, 'per_page', 'integer', 20, 1, 100);
+        
+        try {
+            $result = $this->medicine->paginate($perPage, $page);
+
+            return $this->json([
+                'success'    => true,
+                'data'       => $result['data'],
+                'pagination' => $result['pagination'],
+            ]);
+        } catch (\Exception $e) {
+            Logger::error('API: Failed to fetch medicines', [
+                'error' => $e->getMessage(),
+                'page' => $page,
+            ]);
+            
+            return $this->json([
+                'success' => false,
+                'message' => 'Failed to fetch medicines',
+            ], 500);
         }
-
-        $page   = max(1, (int) $request->get('page', 1));
-        $result = $this->medicine->paginate(20, $page);
-
-        return $this->json([
-            'success'    => true,
-            'data'       => $result['data'],
-            'pagination' => $result['pagination'],
-        ]);
     }
 
     public function show(Request $request, string $id)
     {
-        if (!ctype_digit($id)) {
-            return $this->json(['success' => false, 'message' => 'Invalid medicine ID'], 422);
+        // Validate ID
+        $id = $this->validateId($id);
+        
+        try {
+            $medicine = $this->medicine->find($id);
+
+            if (!$medicine) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Medicine not found'
+                ], 404);
+            }
+
+            return $this->json([
+                'success' => true,
+                'data' => $medicine
+            ]);
+        } catch (\Exception $e) {
+            Logger::error('API: Failed to fetch medicine', [
+                'error' => $e->getMessage(),
+                'id' => $id,
+            ]);
+            
+            return $this->json([
+                'success' => false,
+                'message' => 'Failed to fetch medicine',
+            ], 500);
         }
-
-        $medicine = $this->medicine->find((int) $id);
-
-        if (!$medicine) {
-            return $this->json(['success' => false, 'message' => 'Medicine not found'], 404);
-        }
-
-        return $this->json(['success' => true, 'data' => $medicine]);
     }
 
     public function stock(Request $request, string $id)
     {
-        if (!ctype_digit($id)) {
-            return $this->json(['success' => false, 'message' => 'Invalid medicine ID'], 422);
+        // Validate ID
+        $id = $this->validateId($id);
+        
+        try {
+            $medicine = $this->medicine->withBatches($id);
+
+            if (!$medicine) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Medicine not found'
+                ], 404);
+            }
+
+            return $this->json([
+                'success' => true,
+                'data'    => [
+                    'medicine_id' => $medicine['id'],
+                    'name'        => $medicine['name'],
+                    'total_stock' => $medicine['total_stock'],
+                    'batches'     => $medicine['batches'],
+                ],
+            ]);
+        } catch (\Exception $e) {
+            Logger::error('API: Failed to fetch medicine stock', [
+                'error' => $e->getMessage(),
+                'id' => $id,
+            ]);
+            
+            return $this->json([
+                'success' => false,
+                'message' => 'Failed to fetch stock information',
+            ], 500);
         }
-
-        $medicine = $this->medicine->withBatches((int) $id);
-
-        if (!$medicine) {
-            return $this->json(['success' => false, 'message' => 'Medicine not found'], 404);
-        }
-
-        return $this->json([
-            'success' => true,
-            'data'    => [
-                'medicine_id' => $medicine['id'],
-                'name'        => $medicine['name'],
-                'total_stock' => $medicine['total_stock'],
-                'batches'     => $medicine['batches'],
-            ],
-        ]);
     }
 
     public function toggleStatus(Request $request, string $id)
     {
-        if (!ctype_digit($id)) {
-            return $this->json(['success' => false, 'message' => 'Invalid medicine ID'], 422);
+        // Validate ID
+        $id = $this->validateId($id);
+        
+        try {
+            $medicine = $this->medicine->find($id);
+
+            if (!$medicine) {
+                return $this->json([
+                    'success' => false,
+                    'message' => 'Medicine not found'
+                ], 404);
+            }
+
+            $newStatus = $medicine['is_active'] ? 0 : 1;
+            $this->medicine->update($id, ['is_active' => $newStatus]);
+            
+            Logger::info('API: Medicine status toggled', [
+                'medicine_id' => $id,
+                'new_status' => $newStatus,
+            ]);
+
+            return $this->json([
+                'success' => true,
+                'message' => 'Status updated successfully',
+                'is_active' => $newStatus
+            ]);
+        } catch (\Exception $e) {
+            Logger::error('API: Failed to toggle medicine status', [
+                'error' => $e->getMessage(),
+                'id' => $id,
+            ]);
+            
+            return $this->json([
+                'success' => false,
+                'message' => 'Failed to update status',
+            ], 500);
         }
-
-        $medicine = $this->medicine->find((int) $id);
-
-        if (!$medicine) {
-            return $this->json(['success' => false, 'message' => 'Medicine not found'], 404);
-        }
-
-        $newStatus = $medicine['is_active'] ? 0 : 1;
-        $this->medicine->update((int) $id, ['is_active' => $newStatus]);
-
-        return $this->json([
-            'success'   => true,
-            'message'   => 'Status updated successfully',
-            'is_active' => $newStatus,
-        ]);
     }
 
     public function expiring(Request $request)
     {
-        $validator = new Validator($request->all());
-        if (!$validator->validate(['days' => 'numeric'])) {
-            return $this->json(['success' => false, 'errors' => $validator->errors()], 422);
+        // Validate query parameters
+        $days = $this->validateQueryParam($request, 'days', 'integer', 30, 1, 365);
+        
+        try {
+            $batches = $this->batch->getExpiringSoon($days);
+
+            return $this->json([
+                'success' => true,
+                'data'    => $batches,
+                'count'   => count($batches),
+                'message' => count($batches) . " batches expiring in {$days} days",
+            ]);
+        } catch (\Exception $e) {
+            Logger::error('API: Failed to fetch expiring batches', [
+                'error' => $e->getMessage(),
+                'days' => $days,
+            ]);
+            
+            return $this->json([
+                'success' => false,
+                'message' => 'Failed to fetch expiring batches',
+            ], 500);
         }
-
-        $days    = max(1, (int) $request->get('days', 30));
-        $batches = $this->batch->getExpiringSoon($days);
-
-        return $this->json([
-            'success' => true,
-            'data'    => $batches,
-            'count'   => count($batches),
-            'message' => count($batches) . " batches expiring in {$days} days",
-        ]);
     }
 
     public function lowStock(Request $request)
     {
-        $validator = new Validator($request->all());
-        if (!$validator->validate(['threshold' => 'numeric'])) {
-            return $this->json(['success' => false, 'errors' => $validator->errors()], 422);
+        // Validate query parameters
+        $threshold = $this->validateQueryParam($request, 'threshold', 'integer', 10, 1, 10000);
+        
+        try {
+            $medicines = $this->medicine->getLowStock($threshold);
+
+            return $this->json([
+                'success' => true,
+                'data'    => $medicines,
+                'count'   => count($medicines),
+                'message' => count($medicines) . " medicines below threshold of {$threshold}",
+            ]);
+        } catch (\Exception $e) {
+            Logger::error('API: Failed to fetch low stock medicines', [
+                'error' => $e->getMessage(),
+                'threshold' => $threshold,
+            ]);
+            
+            return $this->json([
+                'success' => false,
+                'message' => 'Failed to fetch low stock medicines',
+            ], 500);
         }
-
-        $threshold = max(0, (int) $request->get('threshold', 10));
-        $medicines = $this->medicine->getLowStock($threshold);
-
-        return $this->json([
-            'success' => true,
-            'data'    => $medicines,
-            'count'   => count($medicines),
-            'message' => count($medicines) . " medicines below threshold of {$threshold}",
-        ]);
     }
 }

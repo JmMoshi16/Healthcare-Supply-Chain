@@ -4,36 +4,70 @@ namespace App\Controllers\Api;
 
 use App\Controllers\BaseController;
 use App\Core\Request;
+use App\Core\ApiValidator;
+use App\Core\Logger;
 use App\Models\Medicine;
 use App\Models\Batch;
 use App\Models\Stock;
 
 class SearchApiController extends BaseController
 {
+    use ApiValidator;
+    
     public function search(Request $request)
     {
-        $query = $request->get('q', '');
+        // Validate query parameter
+        $query = $this->validateQueryParam($request, 'q', 'string', '', 2, 100);
         
         if (strlen($query) < 2) {
             return $this->json([
                 'success' => false,
-                'message' => 'Query too short'
+                'message' => 'Search query must be at least 2 characters'
             ], 400);
         }
         
-        $medicines = $this->searchMedicines($query);
-        $batches = $this->searchBatches($query);
+        // Prevent SQL injection
+        if (!$this->preventSqlInjection($query)) {
+            Logger::warning('API: SQL injection attempt detected', [
+                'query' => $query,
+                'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+            ]);
+            
+            return $this->json([
+                'success' => false,
+                'message' => 'Invalid search query'
+            ], 400);
+        }
         
-        return $this->json([
-            'success' => true,
-            'medicines' => $medicines,
-            'batches' => $batches,
-            'total' => count($medicines) + count($batches)
-        ]);
+        // Sanitize for XSS
+        $query = $this->preventXss($query);
+        
+        try {
+            $medicines = $this->searchMedicines($query);
+            $batches = $this->searchBatches($query);
+            
+            return $this->json([
+                'success' => true,
+                'medicines' => $medicines,
+                'batches' => $batches,
+                'total' => count($medicines) + count($batches)
+            ]);
+        } catch (\Exception $e) {
+            Logger::error('API: Search failed', [
+                'error' => $e->getMessage(),
+                'query' => $query,
+            ]);
+            
+            return $this->json([
+                'success' => false,
+                'message' => 'Search failed'
+            ], 500);
+        }
     }
     
     private function searchMedicines(string $query): array
     {
+        // Use parameterized query to prevent SQL injection
         $sql = "
             SELECT id, name, generic_name, category, unit
             FROM medicines
@@ -53,6 +87,7 @@ class SearchApiController extends BaseController
     
     private function searchBatches(string $query): array
     {
+        // Use parameterized query to prevent SQL injection
         $sql = "
             SELECT b.id, b.batch_number, b.current_quantity, b.expiry_date, m.name as medicine_name
             FROM batches b

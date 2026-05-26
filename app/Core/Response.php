@@ -57,4 +57,17 @@ class Response
         $this->statusCode = $code;
         return $this;
     }
+    
+    public function withHeaders(array $headers): self
+    {
+        foreach ($headers as $name => $value) {
+            $this->headers[$name] = $value;
+        }
+        return $this;
+    }
+    
+    public function getHeaders(): array
+    {
+        return $this->headers;
+    }
 }
