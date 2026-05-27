@@ -7,6 +7,23 @@ class Session
     public static function start(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
+            // Use project-local session storage so InfinityFree's shared /tmp
+            // doesn't wipe sessions between requests
+            $savePath = dirname(__DIR__, 2) . '/storage/sessions';
+            if (is_dir($savePath) && is_writable($savePath)) {
+                session_save_path($savePath);
+            }
+
+            // Explicit cookie params — InfinityFree is HTTP-only on free tier
+            session_set_cookie_params([
+                'lifetime' => 0,
+                'path'     => '/',
+                'domain'   => '',
+                'secure'   => false,
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
+
             session_start();
         }
     }

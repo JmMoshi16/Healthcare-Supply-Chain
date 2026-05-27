@@ -64,6 +64,7 @@ class ApiToken extends BaseModel
         }
 
         $token     = generate_api_token();
+        $tokenHash = hash_password($token); // Hash the token before storing
         $expiresAt = date('Y-m-d H:i:s', strtotime("+{$expiryHours} hours"));
 
         // Get user to determine default granular scopes
@@ -75,7 +76,7 @@ class ApiToken extends BaseModel
 
         $this->create([
             'user_id'    => $userId,
-            'token'      => $token,
+            'token'      => $tokenHash, // Store hashed token
             'expires_at' => $expiresAt,
             'scope'      => $scope,
             'scopes'     => json_encode($scopes),
@@ -90,16 +91,23 @@ class ApiToken extends BaseModel
             'expires_at' => $expiresAt,
         ]);
 
-        return $token;
+        return $token; // Return plain token to user (only time they see it)
     }
 
     public function verify(string $token): ?array
     {
-        $result = $this->query()
-            ->where('token', $token)
-            ->where('expires_at', '>', now())
-            ->where('is_revoked', 0)
-            ->first();
+        // Get all non-expired, non-revoked tokens for verification
+        $sql = "SELECT * FROM api_tokens WHERE expires_at > ? AND is_revoked = 0";
+        $tokens = \App\Core\Database::query($sql, [now()])->fetchAll(\PDO::FETCH_ASSOC);
+
+        $result = null;
+        // Check each token hash until we find a match
+        foreach ($tokens as $tokenRecord) {
+            if (verify_password($token, $tokenRecord['token'])) {
+                $result = $tokenRecord;
+                break;
+            }
+        }
 
         if (!$result) {
             return null;
@@ -138,11 +146,18 @@ class ApiToken extends BaseModel
      */
     public function hasScope(string $token, string $scope): bool
     {
-        $result = $this->query()
-            ->where('token', $token)
-            ->where('expires_at', '>', now())
-            ->where('is_revoked', 0)
-            ->first();
+        // Get all non-expired, non-revoked tokens
+        $sql = "SELECT * FROM api_tokens WHERE expires_at > ? AND is_revoked = 0";
+        $tokens = \App\Core\Database::query($sql, [now()])->fetchAll(\PDO::FETCH_ASSOC);
+
+        $result = null;
+        // Find matching token by verifying hash
+        foreach ($tokens as $tokenRecord) {
+            if (verify_password($token, $tokenRecord['token'])) {
+                $result = $tokenRecord;
+                break;
+            }
+        }
 
         if (!$result) {
             return false;

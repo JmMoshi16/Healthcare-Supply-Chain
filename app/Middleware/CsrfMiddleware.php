@@ -14,7 +14,8 @@ class CsrfMiddleware
 
             if (!$token || !verify_csrf($token)) {
                 flash('error', 'CSRF token validation failed');
-                return (new Response())->redirect('/');
+                $baseUrl = rtrim($_ENV['APP_URL'] ?? '', '/');
+                return (new Response())->redirect($baseUrl . '/login');
             }
         }
 

@@ -13,21 +13,36 @@ class Stock extends BaseModel
 
     public function create(array $data): int
     {
-        (new Batch())->updateStock(
-            (int) $data['batch_id'],
-            (int) $data['quantity'],
-            $data['transaction_type']
-        );
+        $pdo = \App\Core\Database::connect();
+        
+        try {
+            $pdo->beginTransaction();
+            
+            // Step 1: Update batch stock quantity
+            (new Batch())->updateStock(
+                (int) $data['batch_id'],
+                (int) $data['quantity'],
+                $data['transaction_type']
+            );
 
-        $data = $this->filterFillable($data);
-        $data['created_at'] = now();
+            // Step 2: Insert stock transaction record
+            $data = $this->filterFillable($data);
+            $data['created_at'] = now();
 
-        $cols        = implode(', ', array_keys($data));
-        $placeholders = implode(', ', array_fill(0, count($data), '?'));
-        $sql         = "INSERT INTO stocks ({$cols}) VALUES ({$placeholders})";
+            $cols        = implode(', ', array_keys($data));
+            $placeholders = implode(', ', array_fill(0, count($data), '?'));
+            $sql         = "INSERT INTO stocks ({$cols}) VALUES ({$placeholders})";
 
-        \App\Core\Database::query($sql, array_values($data));
-        return (int) \App\Core\Database::lastInsertId();
+            \App\Core\Database::query($sql, array_values($data));
+            $id = (int) \App\Core\Database::lastInsertId();
+            
+            $pdo->commit();
+            return $id;
+            
+        } catch (\Exception $e) {
+            $pdo->rollBack();
+            throw new \Exception('Stock transaction failed: ' . $e->getMessage());
+        }
     }
 
     public function getFiltered(array $filters = [], string $sort = 'created_at', string $dir = 'DESC', int $perPage = 20, int $page = 1): array

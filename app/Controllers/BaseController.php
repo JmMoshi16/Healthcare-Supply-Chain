@@ -13,9 +13,21 @@ abstract class BaseController
         return new Response($content);
     }
 
+    /**
+     * Redirect using an absolute URL.
+     * InfinityFree's mod_rewrite can loop on bare /path redirects,
+     * so we always prepend APP_URL to produce a full http://... URL.
+     */
     protected function redirect(string $url): Response
     {
-        return (new Response())->redirect($url);
+        $baseUrl = rtrim($_ENV['APP_URL'] ?? '', '/');
+        // If already absolute (http/https), use as-is
+        if (str_starts_with($url, 'http://') || str_starts_with($url, 'https://')) {
+            $absoluteUrl = $url;
+        } else {
+            $absoluteUrl = $baseUrl . '/' . ltrim($url, '/');
+        }
+        return (new Response())->redirect($absoluteUrl);
     }
 
     protected function json(array $data, int $status = 200): Response

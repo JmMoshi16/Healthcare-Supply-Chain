@@ -32,28 +32,33 @@ class User extends BaseModel
      */
     public function authenticate(string $email, string $password): ?array
     {
-        $email = strtolower(trim($email));
+        try {
+            $email = strtolower(trim($email));
 
-        // Fetch raw row (including password hash) directly via PDO
-        $stmt = \App\Core\Database::query(
-            "SELECT * FROM users WHERE email = ? AND deleted_at IS NULL LIMIT 1",
-            [$email]
-        );
-        $raw = $stmt->fetch(\PDO::FETCH_ASSOC);
+            // Fetch raw row (including password hash) directly via PDO
+            $stmt = \App\Core\Database::query(
+                "SELECT * FROM users WHERE email = ? AND deleted_at IS NULL LIMIT 1",
+                [$email]
+            );
+            $raw = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        if (!$raw) {
+            if (!$raw) {
+                return null;
+            }
+
+            if (!verify_password($password, $raw['password'])) {
+                return null;
+            }
+
+            if (!(int)$raw['is_active']) {
+                return null;
+            }
+
+            return $this->hideFields($raw);
+        } catch (\Throwable $e) {
+            // Database error during authentication
             return null;
         }
-
-        if (!verify_password($password, $raw['password'])) {
-            return null;
-        }
-
-        if (!(int)$raw['is_active']) {
-            return null;
-        }
-
-        return $this->hideFields($raw);
     }
 
     public function create(array $data): int

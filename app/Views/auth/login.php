@@ -256,11 +256,6 @@ html[data-nav='to-login']::view-transition-new(auth-form) {
         <h1 class="auth-heading">Welcome Back!</h1>
         <p class="auth-subheading">Sign in to your account to continue</p>
 
-        <div class="auth-tabs">
-            <span class="auth-tab active">Sign In</span>
-            <a href="/register" class="auth-tab">Sign Up</a>
-        </div>
-
         <?php if ($error = flash('error')): ?>
         <div class="auth-alert auth-alert-err">
             <i class="bi bi-exclamation-circle-fill"></i>
@@ -310,8 +305,6 @@ html[data-nav='to-login']::view-transition-new(auth-form) {
                 <i class="bi bi-box-arrow-in-right"></i> Sign In
             </button>
         </form>
-
-        <p class="auth-link-row">Don't have an account? <a href="/register">Create one →</a></p>
     </div>
 
     <!-- VISUAL -->

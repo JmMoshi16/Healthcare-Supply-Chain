@@ -32,7 +32,18 @@ class Request
     public function uri(): string
     {
         $uri = $this->server['REQUEST_URI'] ?? '/';
-        return strtok($uri, '?');
+        $uri = strtok($uri, '?');
+
+        // Safety net for InfinityFree: strip /public/ prefix if present.
+        // The root .htaccess routes directly to public/index.php, but
+        // Apache may still pass REQUEST_URI as /public/login in some configs.
+        if (str_starts_with($uri, '/public/')) {
+            $uri = substr($uri, 7); // remove '/public' → keep '/login' etc.
+        } elseif ($uri === '/public') {
+            $uri = '/';
+        }
+
+        return $uri ?: '/';
     }
 
     public function get(string $key, $default = null)

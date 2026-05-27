@@ -42,7 +42,14 @@ class AuthController extends BaseController
             return $this->redirect('/login');
         }
 
-        $user = $this->user->authenticate($data['email'], $data['password']);
+        try {
+            $user = $this->user->authenticate($data['email'], $data['password']);
+        } catch (\Throwable $e) {
+            // Database error during authentication
+            Session::flash('error', 'Authentication service unavailable. Please try again.');
+            Session::flash('old_input', $data);
+            return $this->redirect('/login');
+        }
 
         if (!$user) {
             Session::flash('error', 'Invalid email or password. Please try again.');
@@ -51,6 +58,7 @@ class AuthController extends BaseController
         }
 
         Session::set('user', $user);
+        Session::regenerate();
 
         return $this->redirect($this->dashboardByRole($user['role'] ?? ''));
     }

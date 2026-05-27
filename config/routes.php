@@ -22,8 +22,6 @@ use App\Controllers\ExpiryCalendarController;
 $router->get('/', [AuthController::class, 'loginForm']);
 $router->get('/login', [AuthController::class, 'loginForm']);
 $router->post('/login', [AuthController::class, 'login']);
-$router->get('/register', [AuthController::class, 'registerForm']);
-$router->post('/register', [AuthController::class, 'register']);
 $router->get('/logout', [AuthController::class, 'logout']);
 
 // Protected web routes

@@ -30,34 +30,27 @@ class Database
                     PDO::ATTR_TIMEOUT => 10,
                 ]);
             } catch (PDOException $e) {
-                // Log the full error details securely
-                Logger::critical('Database connection failed', [
-                    'error' => $e->getMessage(),
-                    'code' => $e->getCode(),
-                    'host' => $host ?? 'unknown',
-                    'database' => $dbname ?? 'unknown',
-                ]);
-                
-                // Show generic error to user based on environment
-                $isProduction = ($_ENV['APP_ENV'] ?? 'production') === 'production';
-                
-                if ($isProduction) {
-                    // Production: Generic error message
-                    self::showErrorPage(
-                        'Service Unavailable',
-                        'We are experiencing technical difficulties. Please try again later.',
-                        503
-                    );
-                } else {
-                    // Development: More details but still no credentials
-                    self::showErrorPage(
-                        'Database Connection Failed',
-                        'Unable to connect to the database. Check logs for details.',
-                        500
-                    );
+                // Log securely — wrapped in try in case log dir is not writable (e.g. shared hosting)
+                try {
+                    Logger::critical('Database connection failed', [
+                        'error'    => $e->getMessage(),
+                        'code'     => $e->getCode(),
+                        'host'     => $host ?? 'unknown',
+                        'database' => $dbname ?? 'unknown',
+                    ]);
+                } catch (\Throwable $logErr) {
+                    error_log('[HealthChain] DB connect failed: ' . $e->getMessage());
                 }
-                
-                exit(1);
+
+                self::$connection = null;
+
+                // Throw so caller try-catch blocks (User::authenticate, AuthController::login)
+                // can handle gracefully instead of crashing with a 503.
+                throw new \RuntimeException(
+                    'Database connection failed. Please try again later.',
+                    (int) $e->getCode(),
+                    $e
+                );
             }
         }
         

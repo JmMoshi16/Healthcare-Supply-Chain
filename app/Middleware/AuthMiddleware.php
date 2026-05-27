@@ -11,7 +11,8 @@ class AuthMiddleware
     {
         if (!is_logged_in()) {
             flash('error', 'Please login to continue');
-            return (new Response())->redirect('/login');
+            $baseUrl = rtrim($_ENV['APP_URL'] ?? '', '/');
+            return (new Response())->redirect($baseUrl . '/login');
         }
 
         return null;

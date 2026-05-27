@@ -18,7 +18,8 @@ class View
         $viewPath = __DIR__ . '/../Views/' . str_replace('.', '/', $view) . '.php';
 
         if (!file_exists($viewPath)) {
-            throw new \Exception("View not found: {$view}");
+            http_response_code(404);
+            return '<h1>View Not Found</h1><p>The view does not exist: ' . htmlspecialchars($view) . '</p>';
         }
 
         ob_start();
